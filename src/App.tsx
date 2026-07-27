@@ -8,7 +8,6 @@ import {
   RotateCcw,
   Share2,
   UserRound,
-  UsersRound,
 } from "lucide-react";
 import "./styles.css";
 import {
@@ -30,7 +29,7 @@ import {
   type GameSnapshot,
 } from "./lib/roomService";
 
-type Screen = "avatar" | "mode" | "verify" | "profile" | "howto" | "game" | "result";
+type Screen = "start" | "avatar" | "mode" | "verify" | "profile" | "howto" | "game" | "result";
 type Mode = "individual" | "leadership";
 
 const avatars = [
@@ -196,8 +195,8 @@ function RoomControls({
 }
 
 export default function App() {
-  const [screen, setScreen] = useState<Screen>("avatar");
-  const [avatarId, setAvatarId] = useState<string | null>(null);
+  const [screen, setScreen] = useState<Screen>("start");
+  const [avatarId, setAvatarId] = useState<string | null>("designer");
   const [mode, setMode] = useState<Mode | null>(null);
   const [studentId, setStudentId] = useState("");
   const [profile, setProfile] = useState({ year: "", program: "", accessCode: "" });
@@ -207,6 +206,7 @@ export default function App() {
   const [metrics, setMetrics] = useState<Metrics>(resetMetrics);
   const [roomCode, setRoomCode] = useState<string | null>(null);
   const [roomMessage, setRoomMessage] = useState("");
+  const [howtoReturnScreen, setHowtoReturnScreen] = useState<Screen | null>(null);
 
   const scenario = scenarios[scenarioIndex];
   const selectedChoice = scenario?.choices.find((choice) => choice.id === selectedChoiceId) ?? null;
@@ -218,6 +218,12 @@ export default function App() {
     [choiceHistory],
   );
   const score = scoreFromChoices(selectedChoices);
+
+  useEffect(() => {
+    const stage = document.querySelector(".phone-stage");
+    stage?.scrollTo({ top: 0, behavior: "instant" });
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [screen]);
 
   const snapshot = buildSnapshot({
     screen,
@@ -267,9 +273,19 @@ export default function App() {
       setChoiceHistory((items) => items.slice(0, -1));
       return;
     }
-    const order: Screen[] = ["avatar", "mode", "verify", "profile", "howto", "game", "result"];
+    if (screen === "howto" && howtoReturnScreen) {
+      setScreen(howtoReturnScreen);
+      setHowtoReturnScreen(null);
+      return;
+    }
+    const order: Screen[] = ["start", "verify", "profile", "mode", "howto", "game", "result"];
     const current = order.indexOf(screen);
     setScreen(order[Math.max(0, current - 1)]);
+  };
+
+  const openHowto = (from: Screen = screen) => {
+    setHowtoReturnScreen(from);
+    setScreen("howto");
   };
 
   const handleChoice = (choice: Choice) => {
@@ -293,8 +309,8 @@ export default function App() {
   };
 
   const restart = () => {
-    setScreen("avatar");
-    setAvatarId(null);
+    setScreen("start");
+    setAvatarId("designer");
     setMode(null);
     setStudentId("");
     setProfile({ year: "", program: "", accessCode: "" });
@@ -302,6 +318,7 @@ export default function App() {
     setSelectedChoiceId(null);
     setChoiceHistory([]);
     setMetrics(resetMetrics());
+    setHowtoReturnScreen(null);
   };
 
   const handleCreateRoom = async () => {
@@ -342,11 +359,26 @@ export default function App() {
   return (
     <main className="app-shell">
       <section className="phone-stage">
-        {screen !== "avatar" ? <Header avatarId={avatarId} onBack={goBack} onHelp={() => setScreen("howto")} /> : null}
+        {screen !== "start" ? (
+          <Header avatarId={avatarId} onBack={goBack} onHelp={screen === "howto" ? undefined : () => openHowto()} />
+        ) : null}
+
+        {screen === "start" ? (
+          <section className="start-screen">
+            <div className="pixel-mark" aria-hidden="true" />
+            <img className="start-logo" src="/assets/choose-logo.png" alt="Choose Your Action" />
+            <img className="start-bubble" src="/assets/start-bubble-real.png" alt="Choose your action. Think before you act." />
+            <img className="start-character" src="/assets/start-character.png" alt="" />
+            <button className="image-start-button" type="button" onClick={() => setScreen("verify")}>
+              <img src="/assets/start-button.png" alt="Start" />
+            </button>
+          </section>
+        ) : null}
 
         {screen === "avatar" ? (
           <section className="avatar-screen">
             <div className="pixel-mark" aria-hidden="true" />
+            <img className="asset-logo avatar-logo" src="/assets/choose-logo.png" alt="Choose Your Action" />
             <h1>
               But first, let's choose your <span>avatar</span>
             </h1>
@@ -364,7 +396,7 @@ export default function App() {
                 </button>
               ))}
             </div>
-            <StickerButton tone="yellow" disabled={!avatarId} onClick={() => setScreen("mode")}>
+            <StickerButton tone="yellow" disabled={!avatarId} onClick={() => openHowto("avatar")}>
               Next
             </StickerButton>
           </section>
@@ -372,7 +404,7 @@ export default function App() {
 
         {screen === "mode" ? (
           <section className="mode-screen">
-            <StickerLogo />
+            <img className="asset-logo mode-logo" src="/assets/choose-logo.png" alt="Choose Your Action" />
             <p className="ribbon red">First, choose the mode you want to challenge</p>
             <div className="mode-options">
               <button
@@ -380,7 +412,7 @@ export default function App() {
                 className={mode === "individual" ? "mode-card selected" : "mode-card"}
                 onClick={() => setMode("individual")}
               >
-                <UserRound size={46} />
+                <span className="mode-illustration person-icon" aria-hidden="true" />
                 <span>
                   <strong>Individual Challenge</strong>
                   Self-paced. Choose your responses and earn speed + accuracy points.
@@ -392,7 +424,7 @@ export default function App() {
                 className={mode === "leadership" ? "mode-card selected" : "mode-card"}
                 onClick={() => setMode("leadership")}
               >
-                <UsersRound size={46} />
+                <span className="mode-illustration crown-icon" aria-hidden="true" />
                 <span>
                   <strong>Leadership Role</strong>
                   You're the team lead. Your decisions affect the whole team's outcomes.
@@ -400,7 +432,7 @@ export default function App() {
                 <i>{mode === "leadership" ? <Check size={22} /> : null}</i>
               </button>
             </div>
-            <StickerButton tone="yellow" disabled={!mode} onClick={() => setScreen("verify")}>
+            <StickerButton tone="yellow" disabled={!mode} onClick={() => openHowto("mode")}>
               Next
             </StickerButton>
           </section>
@@ -408,7 +440,7 @@ export default function App() {
 
         {screen === "verify" ? (
           <section className="verify-screen">
-            <StickerLogo />
+            <img className="asset-logo verify-logo" src="/assets/choose-logo.png" alt="Choose Your Action" />
             <form
               className="white-poster verify-card"
               onSubmit={(event) => {
@@ -432,7 +464,7 @@ export default function App() {
                 Next
               </StickerButton>
             </form>
-            <img className="support-character" src="/assets/start-character.png" alt="" />
+            <img className="verify-character" src="/assets/start-character.png" alt="" />
           </section>
         ) : null}
 
@@ -442,12 +474,12 @@ export default function App() {
               <span>The</span>
               Career City
             </div>
-            <p className="speech">Tell us more about yourself</p>
+            <img className="collect-guide" src="/assets/collect-guide.png" alt="" />
             <form
               className="profile-form"
               onSubmit={(event) => {
                 event.preventDefault();
-                setScreen("howto");
+                setScreen("mode");
               }}
             >
               <label>
@@ -499,8 +531,14 @@ export default function App() {
                 <span>No time limit</span>
               </div>
             </div>
-            <img className="support-character" src="/assets/start-character.png" alt="" />
-            <StickerButton tone="red" onClick={() => setScreen("game")}>
+            <img className="howto-character" src="/assets/start-character.png" alt="" />
+            <StickerButton
+              tone="red"
+              onClick={() => {
+                setHowtoReturnScreen(null);
+                setScreen("game");
+              }}
+            >
               Start
             </StickerButton>
           </section>
@@ -558,7 +596,7 @@ export default function App() {
 
         {screen === "result" ? (
           <section className="result-screen">
-            <StickerLogo compact />
+            <img className="asset-logo result-logo" src="/assets/choose-logo.png" alt="Choose Your Action" />
             <article className="white-poster score-card">
               <div className="trophy" aria-hidden="true" />
               <div>
