@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import gsap from "gsap";
 import {
   ArrowRight,
   Check,
@@ -92,7 +93,7 @@ function StickerLogo({ compact = false }: { compact?: boolean }) {
     <div className={compact ? "logo sticker-logo compact" : "logo sticker-logo"}>
       <span className="logo-top">Choose</span>
       <span className="logo-bottom">Your Action</span>
-      <span className="logo-pencil">▰</span>
+      <span className="logo-pencil" aria-hidden="true" />
       <span className="logo-check">
         <Check size={compact ? 18 : 26} strokeWidth={4} />
       </span>
@@ -100,22 +101,31 @@ function StickerLogo({ compact = false }: { compact?: boolean }) {
   );
 }
 
+const shouldReduceMotion = () =>
+  typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 function Header({
   avatarId,
   onBack,
   onHelp,
+  showAvatar = true,
 }: {
   avatarId: string | null;
   onBack?: () => void;
   onHelp?: () => void;
+  showAvatar?: boolean;
 }) {
   const avatar = avatars.find((item) => item.id === avatarId) ?? avatars[0];
   return (
     <header className="game-header">
       <div className="pixel-mark" aria-hidden="true" />
-      <div className="header-avatar">
-        <img src={avatar.img} alt={avatar.label} />
-      </div>
+      {showAvatar ? (
+        <div className="header-avatar">
+          <img src={avatar.img} alt={avatar.label} />
+        </div>
+      ) : (
+        <span aria-hidden="true" />
+      )}
       {onBack ? (
         <button className="back-button" type="button" onClick={onBack}>
           &lt; Back
@@ -233,6 +243,7 @@ function RoomControls({
 }
 
 export default function App() {
+  const stageRef = useRef<HTMLElement | null>(null);
   const [screen, setScreen] = useState<Screen>("start");
   const [avatarId, setAvatarId] = useState<string | null>("designer");
   const [mode, setMode] = useState<Mode | null>(null);
@@ -260,8 +271,119 @@ export default function App() {
   );
   const score = scoreFromChoices(selectedChoices);
 
+  useLayoutEffect(() => {
+    const stage = stageRef.current;
+    if (!stage || shouldReduceMotion()) return undefined;
+
+    const ctx = gsap.context(() => {
+      const activeSection = stage.querySelector(":scope > section");
+      if (!activeSection) return;
+
+      gsap.fromTo(
+        activeSection,
+        { autoAlpha: 0, y: 18 },
+        { autoAlpha: 1, y: 0, duration: 0.42, ease: "back.out(1.25)" },
+      );
+
+      gsap.fromTo(
+        activeSection.querySelectorAll(".asset-logo, .start-logo"),
+        { scale: 0.94, rotate: -1 },
+        { scale: 1, rotate: 0, duration: 0.58, ease: "elastic.out(1, 0.72)" },
+      );
+
+      gsap.fromTo(
+        activeSection.querySelectorAll(".avatar-option, .mode-card, .choice, .metric-card, .badges span"),
+        { autoAlpha: 0, y: 18, scale: 0.96 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.36,
+          ease: "back.out(1.5)",
+          stagger: 0.045,
+          delay: 0.06,
+        },
+      );
+
+      gsap.fromTo(
+        activeSection.querySelectorAll(".start-character, .verify-character, .howto-character, .result-character"),
+        { autoAlpha: 0, y: 26, rotate: -2 },
+        { autoAlpha: 1, y: 0, rotate: 0, duration: 0.62, ease: "back.out(1.2)", delay: 0.12 },
+      );
+
+      gsap.to(
+        activeSection.querySelectorAll(".start-bubble, .start-character, .verify-character, .howto-character, .result-character"),
+        {
+          y: "-=8",
+          duration: 1.8,
+          ease: "sine.inOut",
+          repeat: -1,
+          yoyo: true,
+          stagger: 0.14,
+        },
+      );
+    }, stage);
+
+    return () => ctx.revert();
+  }, [screen, scenarioIndex]);
+
+  useLayoutEffect(() => {
+    const stage = stageRef.current;
+    if (!stage || shouldReduceMotion()) return undefined;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        ".progress-line span, .meter i",
+        { scaleX: 0.4, transformOrigin: "left center" },
+        { scaleX: 1, duration: 0.72, ease: "power3.out", stagger: 0.04 },
+      );
+
+      if (selectedChoiceId) {
+        gsap.fromTo(
+          ".choice.selected",
+          { scale: 0.96, rotate: -0.5 },
+          { scale: 1, rotate: 0, duration: 0.42, ease: "elastic.out(1, 0.62)" },
+        );
+        gsap.fromTo(
+          ".feedback, .feedback-card",
+          { autoAlpha: 0, y: 16 },
+          { autoAlpha: 1, y: 0, duration: 0.38, ease: "back.out(1.35)", stagger: 0.06 },
+        );
+      }
+
+      if (revealSuggested) {
+        gsap.fromTo(
+          ".feedback-suggested",
+          { autoAlpha: 0, y: 12, scale: 0.98 },
+          { autoAlpha: 1, y: 0, scale: 1, duration: 0.32, ease: "back.out(1.3)" },
+        );
+      }
+    }, stage);
+
+    return () => ctx.revert();
+  }, [screen, scenarioIndex, selectedChoiceId, revealSuggested]);
+
+  useLayoutEffect(() => {
+    const stage = stageRef.current;
+    if (!stage || shouldReduceMotion()) return undefined;
+
+    const press = (event: PointerEvent) => {
+      const button = (event.target as Element).closest("button:not(:disabled)");
+      if (!button || !stage.contains(button)) return;
+
+      gsap.fromTo(
+        button,
+        { y: 2 },
+        { y: 0, duration: 0.28, ease: "elastic.out(1, 0.55)", clearProps: "transform" },
+      );
+    };
+
+    stage.addEventListener("pointerdown", press);
+    return () => stage.removeEventListener("pointerdown", press);
+  }, []);
+
   useEffect(() => {
-    const stage = document.querySelector(".phone-stage");
+    const stage = stageRef.current;
     stage?.scrollTo({ top: 0, behavior: "instant" });
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [screen]);
@@ -399,11 +521,21 @@ export default function App() {
     }
   };
 
+  const showTopHeader = screen !== "start" && screen !== "avatar";
+  const showHeaderAvatar = screen !== "avatar" && screen !== "verify";
+  const showHeaderBack = screen === "game" || screen === "howto";
+  const showHeaderHelp = screen === "game";
+
   return (
     <main className="app-shell">
-      <section className="phone-stage">
-        {screen !== "start" ? (
-          <Header avatarId={avatarId} onBack={goBack} onHelp={screen === "howto" ? undefined : () => openHowto()} />
+      <section className="phone-stage" ref={stageRef}>
+        {showTopHeader ? (
+          <Header
+            avatarId={avatarId}
+            showAvatar={showHeaderAvatar}
+            onBack={showHeaderBack ? goBack : undefined}
+            onHelp={showHeaderHelp ? () => openHowto() : undefined}
+          />
         ) : null}
 
         {screen === "start" ? (
@@ -420,6 +552,7 @@ export default function App() {
 
         {screen === "avatar" ? (
           <section className="avatar-screen">
+            <div className="pixel-mark setup-mark" aria-hidden="true" />
             <h1>
               But first, let's choose your <span>avatar</span>
             </h1>
@@ -618,7 +751,7 @@ export default function App() {
               </div>
               <img className="scene-badge" src="/assets/scene-badge.png" alt="" aria-hidden="true" />
               <p>
-                Scene · {scenario.title} · {scenario.category}
+                Scene {"\u00b7"} {scenario.title} {"\u00b7"} {scenario.category}
               </p>
               <h1>{scenario.body}</h1>
             </article>

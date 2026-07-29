@@ -34,6 +34,17 @@ button {
   cursor: pointer;
 }
 
+button:disabled {
+  cursor: not-allowed;
+}
+
+button:focus-visible,
+input:focus-visible,
+summary:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 5px;
+}
+
 .app-shell {
   min-height: 100svh;
   display: grid;
@@ -135,6 +146,10 @@ button {
   transition: transform 160ms ease;
 }
 
+.image-start-button:hover {
+  transform: translateY(-3px) rotate(-1deg);
+}
+
 .image-start-button:active {
   transform: translateY(3px) scale(0.98);
 }
@@ -215,6 +230,11 @@ button {
   font-weight: 900;
   line-height: 1;
   box-shadow: 3px 4px 0 var(--shadow);
+}
+
+.back-button:hover,
+.help-button:hover {
+  transform: translateY(-2px);
 }
 
 .game-header > *:nth-child(3) {
@@ -359,6 +379,11 @@ button {
   transition: transform 140ms ease, box-shadow 140ms ease;
 }
 
+.sticker-button:not(:disabled):hover {
+  transform: translateY(-3px);
+  box-shadow: 7px 10px 0 var(--shadow);
+}
+
 .sticker-button:not(:disabled):active {
   transform: translate(2px, 3px);
   box-shadow: 4px 5px 0 var(--shadow);
@@ -387,7 +412,16 @@ button {
 }
 
 .avatar-screen {
-  padding-top: 4px;
+  position: relative;
+  padding-top: 44px;
+}
+
+.avatar-screen .setup-mark {
+  position: absolute;
+  top: 34px;
+  left: 20px;
+  transform: scale(0.78);
+  transform-origin: top left;
 }
 
 .avatar-logo,
@@ -404,11 +438,11 @@ button {
 }
 
 .avatar-screen h1 {
-  margin: 4px 0 34px;
+  margin: 0 0 16px min(38vw, 156px);
   color: #fff;
-  font-size: clamp(1.9rem, 8.4vw, 2.7rem);
+  font-size: clamp(1.65rem, 6vw, 2.35rem);
   line-height: 1.02;
-  max-width: 14ch;
+  max-width: 13ch;
 }
 
 .avatar-screen h1 span {
@@ -427,13 +461,18 @@ button {
 .avatar-option {
   aspect-ratio: 1;
   width: 100%;
-  max-width: 150px;
+  max-width: 136px;
   border: 4px solid var(--ink);
   border-radius: 999px;
   background: #fff;
   overflow: hidden;
   padding: 0;
   transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.avatar-option:not(.selected):hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 0 var(--shadow);
 }
 
 .avatar-option img {
@@ -444,8 +483,9 @@ button {
 }
 
 .avatar-option.selected {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 0 var(--shadow);
+  background: var(--blue);
+  transform: translateY(-2px);
+  box-shadow: none;
 }
 
 .mode-options {
@@ -462,9 +502,15 @@ button {
   gap: 14px;
   text-align: left;
   background: #fff;
+  border: 3px solid var(--ink);
   border-radius: 18px;
   padding: 18px 22px;
   box-shadow: 8px 10px 0 var(--shadow);
+}
+
+.mode-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 9px 12px 0 var(--shadow);
 }
 
 .mode-card strong {
@@ -926,7 +972,7 @@ button {
 
 .choice {
   min-height: 78px;
-  border: 0;
+  border: 3px solid var(--ink);
   border-radius: 14px;
   background: #fff;
   box-shadow: 6px 8px 0 var(--shadow);
@@ -935,6 +981,11 @@ button {
   font-weight: 900;
   font-size: clamp(1rem, 4.2vw, 1.2rem);
   transition: transform 140ms ease, box-shadow 140ms ease;
+}
+
+.choice:not(.selected):hover {
+  transform: translateY(-3px);
+  box-shadow: 7px 10px 0 var(--shadow);
 }
 
 .choice.selected.good {
@@ -1030,6 +1081,10 @@ button {
   font-style: italic;
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+.feedback-reveal:hover {
+  color: var(--blue);
 }
 
 .feedback-suggested {
@@ -1342,11 +1397,11 @@ button {
   transform: translateY(-2px);
 }
 
-.image-start-button {
+.image-start-button img {
   animation: gentle-pulse 3.2s ease-in-out infinite;
 }
 
-.image-start-button:active {
+.image-start-button:active img {
   animation: none;
 }
 
