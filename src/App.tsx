@@ -3,15 +3,16 @@ import {
   ArrowRight,
   Check,
   ChevronDown,
-  HelpCircle,
+  Clock,
   Info,
+  ListChecks,
   RotateCcw,
   Share2,
-  UserRound,
 } from "lucide-react";
 import "./styles.css";
 import {
   metricColors,
+  metricDescriptions,
   metricLabels,
   scenarios,
   type Choice,
@@ -33,14 +34,14 @@ type Screen = "start" | "avatar" | "mode" | "verify" | "profile" | "howto" | "ga
 type Mode = "individual" | "leadership";
 
 const avatars = [
-  { id: "designer", label: "Design lead", hue: "#f15add" },
-  { id: "creator", label: "Campus creator", hue: "#4bd2db" },
-  { id: "analyst", label: "Careful analyst", hue: "#ffd000" },
-  { id: "builder", label: "Team builder", hue: "#ed1b2f" },
-  { id: "planner", label: "Project planner", hue: "#ffffff" },
-  { id: "speaker", label: "Confident speaker", hue: "#ff9a57" },
-  { id: "mentor", label: "Peer mentor", hue: "#f8a6d9" },
-  { id: "maker", label: "Blue maker", hue: "#145be8" },
+  { id: "designer", label: "Design lead", hue: "#f15add", img: "/assets/avatars/designer.png" },
+  { id: "creator", label: "Campus creator", hue: "#4bd2db", img: "/assets/avatars/creator.png" },
+  { id: "analyst", label: "Careful analyst", hue: "#ffd000", img: "/assets/avatars/analyst.png" },
+  { id: "builder", label: "Team builder", hue: "#ed1b2f", img: "/assets/avatars/builder.png" },
+  { id: "planner", label: "Project planner", hue: "#ffffff", img: "/assets/avatars/planner.png" },
+  { id: "speaker", label: "Confident speaker", hue: "#ff9a57", img: "/assets/avatars/speaker.png" },
+  { id: "mentor", label: "Peer mentor", hue: "#f8a6d9", img: "/assets/avatars/mentor.png" },
+  { id: "maker", label: "Blue maker", hue: "#145be8", img: "/assets/avatars/maker.png" },
 ];
 
 const outcomeClass: Record<Outcome, string> = {
@@ -54,6 +55,21 @@ const outcomeLabel: Record<Outcome, string> = {
   partial: "Partially right",
   risky: "Risky choice",
 };
+
+const reflectionQuestions = [
+  {
+    question: "Which choices felt difficult?",
+    detail: "What made them hard, the relationship at stake, the uncertainty, or not knowing your rights?",
+  },
+  {
+    question: "What rights do employees have in these situations?",
+    detail: "Think about labour law, your contract, and the right to a safe workplace.",
+  },
+  {
+    question: "How could communication improve the outcome?",
+    detail: "Could any of these situations have been avoided with clearer conversations earlier?",
+  },
+];
 
 function buildSnapshot(state: {
   screen: Screen;
@@ -97,19 +113,23 @@ function Header({
   return (
     <header className="game-header">
       <div className="pixel-mark" aria-hidden="true" />
-      <div className="avatar-chip" style={{ "--avatar": avatar.hue } as React.CSSProperties}>
-        <UserRound size={28} />
+      <div className="header-avatar">
+        <img src={avatar.img} alt={avatar.label} />
       </div>
       {onBack ? (
         <button className="back-button" type="button" onClick={onBack}>
           &lt; Back
         </button>
-      ) : null}
+      ) : (
+        <span aria-hidden="true" />
+      )}
       {onHelp ? (
         <button className="help-button" type="button" aria-label="How to play" onClick={onHelp}>
-          <HelpCircle size={30} />
+          ?
         </button>
-      ) : null}
+      ) : (
+        <span aria-hidden="true" />
+      )}
     </header>
   );
 }
@@ -137,17 +157,35 @@ function StickerButton({
   );
 }
 
-function MetricCard({ metric, value }: { metric: MetricKey; value: number }) {
+function MetricCard({
+  metric,
+  value,
+  open,
+  onToggle,
+}: {
+  metric: MetricKey;
+  value: number;
+  open: boolean;
+  onToggle: () => void;
+}) {
   return (
-    <button className="metric-card" type="button" title={metricLabels[metric]}>
-      <span>
+    <div className="metric-card">
+      <button
+        className="metric-card-head"
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+      >
         {metricLabels[metric]}
-        <Info size={16} />
-      </span>
+        <i className="info-dot" aria-hidden="true">
+          i
+        </i>
+      </button>
       <span className="meter">
         <i style={{ width: `${value}%`, background: metricColors[metric] }} />
       </span>
-    </button>
+      {open ? <p className="metric-tooltip">{metricDescriptions[metric]}</p> : null}
+    </div>
   );
 }
 
@@ -207,6 +245,9 @@ export default function App() {
   const [roomCode, setRoomCode] = useState<string | null>(null);
   const [roomMessage, setRoomMessage] = useState("");
   const [howtoReturnScreen, setHowtoReturnScreen] = useState<Screen | null>(null);
+  const [openMetric, setOpenMetric] = useState<MetricKey | null>(null);
+  const [revealSuggested, setRevealSuggested] = useState(false);
+  const [reflectionOpen, setReflectionOpen] = useState(false);
 
   const scenario = scenarios[scenarioIndex];
   const selectedChoice = scenario?.choices.find((choice) => choice.id === selectedChoiceId) ?? null;
@@ -278,7 +319,7 @@ export default function App() {
       setHowtoReturnScreen(null);
       return;
     }
-    const order: Screen[] = ["start", "verify", "profile", "mode", "howto", "game", "result"];
+    const order: Screen[] = ["start", "avatar", "verify", "profile", "mode", "howto", "game", "result"];
     const current = order.indexOf(screen);
     setScreen(order[Math.max(0, current - 1)]);
   };
@@ -290,6 +331,7 @@ export default function App() {
 
   const handleChoice = (choice: Choice) => {
     setSelectedChoiceId(choice.id);
+    setRevealSuggested(false);
     setChoiceHistory((items) => {
       const next = [...items];
       next[scenarioIndex] = choice.id;
@@ -298,6 +340,7 @@ export default function App() {
   };
 
   const nextScenario = () => {
+    setRevealSuggested(false);
     if (scenarioIndex >= scenarios.length - 1) {
       setSelectedChoiceId(null);
       setScreen("result");
@@ -368,17 +411,15 @@ export default function App() {
             <div className="pixel-mark" aria-hidden="true" />
             <img className="start-logo" src="/assets/choose-logo.png" alt="Choose Your Action" />
             <img className="start-bubble" src="/assets/start-bubble-real.png" alt="Choose your action. Think before you act." />
-            <img className="start-character" src="/assets/start-character.png" alt="" />
-            <button className="image-start-button" type="button" onClick={() => setScreen("verify")}>
+            <button className="image-start-button" type="button" onClick={() => setScreen("avatar")}>
               <img src="/assets/start-button.png" alt="Start" />
             </button>
+            <img className="start-character" src="/assets/start-character.png" alt="" />
           </section>
         ) : null}
 
         {screen === "avatar" ? (
           <section className="avatar-screen">
-            <div className="pixel-mark" aria-hidden="true" />
-            <img className="asset-logo avatar-logo" src="/assets/choose-logo.png" alt="Choose Your Action" />
             <h1>
               But first, let's choose your <span>avatar</span>
             </h1>
@@ -389,14 +430,13 @@ export default function App() {
                   className={avatarId === avatar.id ? "avatar-option selected" : "avatar-option"}
                   type="button"
                   onClick={() => setAvatarId(avatar.id)}
-                  style={{ "--avatar": avatar.hue } as React.CSSProperties}
                   aria-label={avatar.label}
                 >
-                  <UserRound size={48} />
+                  <img src={avatar.img} alt="" />
                 </button>
               ))}
             </div>
-            <StickerButton tone="yellow" disabled={!avatarId} onClick={() => openHowto("avatar")}>
+            <StickerButton tone="yellow" disabled={!avatarId} onClick={() => setScreen("verify")}>
               Next
             </StickerButton>
           </section>
@@ -412,7 +452,7 @@ export default function App() {
                 className={mode === "individual" ? "mode-card selected" : "mode-card"}
                 onClick={() => setMode("individual")}
               >
-                <span className="mode-illustration person-icon" aria-hidden="true" />
+                <img className="mode-illustration" src="/assets/mode-person.png" alt="" aria-hidden="true" />
                 <span>
                   <strong>Individual Challenge</strong>
                   Self-paced. Choose your responses and earn speed + accuracy points.
@@ -424,7 +464,7 @@ export default function App() {
                 className={mode === "leadership" ? "mode-card selected" : "mode-card"}
                 onClick={() => setMode("leadership")}
               >
-                <span className="mode-illustration crown-icon" aria-hidden="true" />
+                <img className="mode-illustration" src="/assets/mode-crown.png" alt="" aria-hidden="true" />
                 <span>
                   <strong>Leadership Role</strong>
                   You're the team lead. Your decisions affect the whole team's outcomes.
@@ -459,21 +499,21 @@ export default function App() {
                   required
                 />
               </label>
-              <small>Please enter your SID to verify!</small>
+              <span className="card-sparkle" aria-hidden="true" />
+              <span className="card-dot" aria-hidden="true" />
+              <span className="card-diamond" aria-hidden="true" />
               <StickerButton tone="yellow" disabled={!studentId.trim()} buttonType="submit">
                 Next
               </StickerButton>
             </form>
+            <p className="verify-note">Please enter your SID to verify!</p>
             <img className="verify-character" src="/assets/start-character.png" alt="" />
           </section>
         ) : null}
 
         {screen === "profile" ? (
           <section className="profile-screen">
-            <div className="city-logo">
-              <span>The</span>
-              Career City
-            </div>
+            <img className="asset-logo profile-logo" src="/assets/choose-logo.png" alt="Choose Your Action" />
             <img className="collect-guide" src="/assets/collect-guide.png" alt="" />
             <form
               className="profile-form"
@@ -483,7 +523,7 @@ export default function App() {
               }}
             >
               <label>
-                <span className="ribbon yellow">What year of study are you in?</span>
+                <span className="ribbon red flag">What year of study are you in?</span>
                 <input
                   value={profile.year}
                   onChange={(event) => setProfile((item) => ({ ...item, year: event.target.value }))}
@@ -492,7 +532,7 @@ export default function App() {
                 />
               </label>
               <label>
-                <span className="ribbon yellow">What is your current program?</span>
+                <span className="ribbon red flag">What is your current program?</span>
                 <input
                   value={profile.program}
                   onChange={(event) => setProfile((item) => ({ ...item, program: event.target.value }))}
@@ -501,8 +541,9 @@ export default function App() {
                 />
               </label>
               <label>
-                <span className="ribbon yellow">
+                <span className="ribbon red flag access-ribbon">
                   Access code <em>(Optional)</em>
+                  <Info size={18} />
                 </span>
                 <input
                   value={profile.accessCode}
@@ -520,6 +561,14 @@ export default function App() {
         {screen === "howto" ? (
           <section className="howto-screen">
             <div className="notebook-card">
+              <div className="tab-strip" aria-hidden="true">
+                {["#ed1b2f", "#ffd000", "#fff", "#05004b", "#f15add", "#fff", "#4bd2db", "#05004b"].map(
+                  (color, index) => (
+                    <i key={`${color}-${index}`} style={{ background: color }} />
+                  ),
+                )}
+              </div>
+              <img className="scene-badge" src="/assets/scene-badge.png" alt="" aria-hidden="true" />
               <h1>How to play</h1>
               <ul>
                 <li>You will be placed inside a real workplace scenario that interns and entry-level employees commonly face.</li>
@@ -527,8 +576,18 @@ export default function App() {
                 <li>Learn from the consequences and reflect on your choices.</li>
               </ul>
               <div className="badges">
-                <span>11 scenarios</span>
-                <span>No time limit</span>
+                <span>
+                  <i className="badge-icon">
+                    <ListChecks size={18} />
+                  </i>
+                  11 scenarios
+                </span>
+                <span>
+                  <i className="badge-icon">
+                    <Clock size={18} />
+                  </i>
+                  No time limit
+                </span>
               </div>
             </div>
             <img className="howto-character" src="/assets/start-character.png" alt="" />
@@ -557,6 +616,7 @@ export default function App() {
                   ),
                 )}
               </div>
+              <img className="scene-badge" src="/assets/scene-badge.png" alt="" aria-hidden="true" />
               <p>
                 Scene · {scenario.title} · {scenario.category}
               </p>
@@ -564,7 +624,13 @@ export default function App() {
             </article>
             <div className="metrics-grid">
               {(Object.keys(metricLabels) as MetricKey[]).map((metric) => (
-                <MetricCard key={metric} metric={metric} value={selectedChoice ? metrics[metric] : scenario.startingMetrics[metric]} />
+                <MetricCard
+                  key={metric}
+                  metric={metric}
+                  value={selectedChoice ? metrics[metric] : scenario.startingMetrics[metric]}
+                  open={openMetric === metric}
+                  onToggle={() => setOpenMetric((current) => (current === metric ? null : metric))}
+                />
               ))}
             </div>
             <h2 className="question-title">What do you do?</h2>
@@ -583,11 +649,32 @@ export default function App() {
               ))}
             </div>
             {selectedChoice ? (
-              <aside className={`feedback ${outcomeClass[selectedChoice.outcome]}`}>
-                <strong>{outcomeLabel[selectedChoice.outcome]}</strong>
-                <p>{selectedChoice.feedback.replace(`${outcomeLabel[selectedChoice.outcome]}. `, "")}</p>
-                <StickerButton tone={selectedChoice.outcome === "risky" ? "red" : "yellow"} onClick={nextScenario}>
-                  {scenarioIndex >= scenarios.length - 1 ? "See result" : "Next"}
+              <aside className="feedback">
+                <h3 className="feedback-heading">Here's what this costs you</h3>
+                <div className="feedback-card">
+                  <div className="feedback-head">
+                    <i className={`feedback-dot ${outcomeClass[selectedChoice.outcome]}`} aria-hidden="true" />
+                    <strong>{outcomeLabel[selectedChoice.outcome]}</strong>
+                  </div>
+                  <p>{selectedChoice.feedback.replace(`${outcomeLabel[selectedChoice.outcome]}. `, "")}</p>
+                  <span className="feedback-points">Accuracy: +{selectedChoice.score} pts</span>
+                  {selectedChoice.outcome !== "good" ? (
+                    <button
+                      className="feedback-reveal"
+                      type="button"
+                      onClick={() => setRevealSuggested((value) => !value)}
+                    >
+                      {revealSuggested ? "Hide the suggested response" : "Tap to see the suggested response"}
+                    </button>
+                  ) : null}
+                  {revealSuggested && selectedChoice.outcome !== "good" ? (
+                    <p className="feedback-suggested">
+                      {scenario.choices.find((choice) => choice.outcome === "good")?.label}
+                    </p>
+                  ) : null}
+                </div>
+                <StickerButton tone="yellow" onClick={nextScenario}>
+                  {scenarioIndex >= scenarios.length - 1 ? "See result" : "Next scene"}
                 </StickerButton>
               </aside>
             ) : null}
@@ -598,7 +685,7 @@ export default function App() {
           <section className="result-screen">
             <img className="asset-logo result-logo" src="/assets/choose-logo.png" alt="Choose Your Action" />
             <article className="white-poster score-card">
-              <div className="trophy" aria-hidden="true" />
+              <img className="trophy" src="/assets/trophy.png" alt="" aria-hidden="true" />
               <div>
                 <h1>Your score</h1>
                 <strong>{score}</strong>
@@ -609,15 +696,23 @@ export default function App() {
                 <span>Workplace Ethics <b>{selectedChoices.slice(6).reduce((sum, choice) => sum + choice.score, 0)}</b></span>
               </div>
             </article>
-            <details className="reflection">
+            <details
+              className="reflection"
+              open={reflectionOpen}
+              onToggle={(event) => setReflectionOpen(event.currentTarget.open)}
+            >
               <summary>
-                Tap here to see reflection questions <ChevronDown size={28} />
+                {reflectionOpen ? "Reflection questions" : "Tap here to see reflection questions"}
+                <ChevronDown size={28} className={reflectionOpen ? "flip" : ""} />
               </summary>
-              <ol>
-                <li>Which decision felt most difficult, and why?</li>
-                <li>What information would you ask for before making a workplace decision?</li>
-                <li>Who could you contact at RMIT or work if you felt unsure?</li>
-              </ol>
+              <div className="reflection-list">
+                {reflectionQuestions.map((item) => (
+                  <div className="reflection-item" key={item.question}>
+                    <strong>{item.question}</strong>
+                    <p>{item.detail}</p>
+                  </div>
+                ))}
+              </div>
             </details>
             <p className="speech result-speech">Would you like to challenge again?</p>
             <img className="result-character" src="/assets/result-character.png" alt="" />
@@ -626,7 +721,7 @@ export default function App() {
                 Of course, LET'S GO!
               </StickerButton>
               <StickerButton tone="white" onClick={() => setScreen("mode")} icon={<ArrowRight size={24} />}>
-                Back to mode
+                No, let's go back to homepage
               </StickerButton>
             </div>
           </section>

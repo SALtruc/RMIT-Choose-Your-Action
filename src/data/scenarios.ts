@@ -36,6 +36,13 @@ export const metricColors: Record<MetricKey, string> = {
   career: "#ffd000",
 };
 
+export const metricDescriptions: Record<MetricKey, string> = {
+  teamTrust: "How much your colleagues and manager trust and respect you based on how you handle situations at work.",
+  stress: "Your current stress level. High stress affects your performance, wellbeing, and decision-making over time.",
+  reputation: "How you are perceived professionally: by your team, your manager, and the broader workplace.",
+  career: "The long-term impact of your decisions on your career growth, opportunities, and professional development.",
+};
+
 const neutral: Metrics = {
   teamTrust: 56,
   stress: 72,
