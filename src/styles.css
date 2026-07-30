@@ -136,7 +136,7 @@ summary:focus-visible {
   display: block;
   width: 112%;
   max-width: none;
-  margin: 72px 0 0 -20px;
+  margin: 40px 0 0 -20px;
   filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.9));
 }
 
@@ -145,7 +145,7 @@ summary:focus-visible {
   z-index: 2;
   display: block;
   width: 92%;
-  margin: 36px 0 0 auto;
+  margin: 20px 0 0 auto;
   filter: drop-shadow(8px 10px 0 #000);
 }
 
@@ -153,9 +153,9 @@ summary:focus-visible {
   position: absolute;
   z-index: 1;
   display: block;
-  left: clamp(-12px, -2vw, -2px);
+  left: 0;
   bottom: 0;
-  width: min(66vw, 300px);
+  width: min(82vw, 375px);
   max-width: none;
   pointer-events: none;
 }
@@ -164,7 +164,7 @@ summary:focus-visible {
   position: relative;
   z-index: 3;
   display: block;
-  margin: clamp(24px, 5vh, 40px) auto 0;
+  margin: clamp(14px, 3vh, 24px) auto 0;
   width: min(42vw, 190px);
   border: 0;
   background: transparent;
@@ -647,6 +647,7 @@ summary:focus-visible {
   gap: 14px;
   text-align: center;
   padding: 40px 32px 26px;
+  margin-top: 18px;
 }
 
 .verify-card p {
@@ -769,7 +770,7 @@ summary:focus-visible {
   display: block;
   width: min(100%, 460px);
   max-width: none;
-  margin: 4px 0 16px;
+  margin: 22px 0 20px;
   pointer-events: none;
 }
 
@@ -833,8 +834,8 @@ summary:focus-visible {
 }
 
 .notebook-card {
-  margin-top: 40px;
-  padding: 26px 26px 22px;
+  margin-top: 30px;
+  padding: 22px 24px 18px;
   background: #fff;
   border-radius: 0 0 20px 20px;
   box-shadow: 8px 10px 0 var(--shadow);
@@ -851,8 +852,8 @@ summary:focus-visible {
 .notebook-card h1 {
   text-align: center;
   color: var(--red);
-  font-size: clamp(2.3rem, 10vw, 3.2rem);
-  margin: 0 0 18px;
+  font-size: clamp(2.1rem, 9vw, 2.9rem);
+  margin: 0 0 12px;
   font-weight: 900;
 }
 
@@ -862,18 +863,18 @@ summary:focus-visible {
 }
 
 .notebook-card li {
-  margin: 0 0 14px;
+  margin: 0 0 9px;
   color: var(--navy);
-  font-size: clamp(1.05rem, 4.6vw, 1.45rem);
-  line-height: 1.55;
+  font-size: clamp(1rem, 4.2vw, 1.35rem);
+  line-height: 1.42;
   font-weight: 500;
 }
 
 .badges {
   display: grid;
   justify-items: end;
-  gap: 16px;
-  margin-top: 24px;
+  gap: 10px;
+  margin-top: 14px;
 }
 
 .badges span {
@@ -906,17 +907,26 @@ summary:focus-visible {
   color: var(--navy);
 }
 
+.howto-footer {
+  flex: none;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+}
+
 .howto-character {
-  width: min(46vw, 220px);
-  margin-left: clamp(-40px, -10vw, -24px);
-  margin-top: clamp(-40px, -8vw, -24px);
+  flex: none;
+  width: min(34vw, 150px);
+  margin: 0 0 0 clamp(-12px, -3vw, -4px);
   pointer-events: none;
 }
 
 .howto-screen .sticker-button {
   display: block;
   flex: none;
-  margin: 14px 0 0 auto;
+  margin: 0 0 4px;
 }
 
 .progress-line {

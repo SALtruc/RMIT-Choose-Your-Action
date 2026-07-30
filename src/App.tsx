@@ -771,17 +771,19 @@ export default function App() {
                   </span>
                 </div>
               </div>
-              <img className="howto-character" src="/assets/start-character.png" alt="" />
             </div>
-            <StickerButton
-              tone="red"
-              onClick={() => {
-                setHowtoReturnScreen(null);
-                setScreen("game");
-              }}
-            >
-              Start
-            </StickerButton>
+            <div className="howto-footer">
+              <img className="howto-character" src="/assets/start-character.png" alt="" />
+              <StickerButton
+                tone="red"
+                onClick={() => {
+                  setHowtoReturnScreen(null);
+                  setScreen("game");
+                }}
+              >
+                Start
+              </StickerButton>
+            </div>
           </section>
         ) : null}
 
