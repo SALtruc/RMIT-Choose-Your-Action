@@ -58,7 +58,9 @@ summary:focus-visible {
 
 .phone-stage {
   width: min(100vw, 520px);
-  min-height: 100svh;
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
   position: relative;
   overflow: hidden auto;
   padding: max(18px, env(safe-area-inset-top)) 22px max(28px, env(safe-area-inset-bottom));
@@ -69,16 +71,40 @@ summary:focus-visible {
   background-size: 68px 68px;
 }
 
+.phone-stage > section {
+  flex-shrink: 0;
+  width: 100%;
+}
+
 .desktop-side {
   display: none;
 }
 
 .pixel-mark {
+  flex: none;
   width: 76px;
   height: 70px;
-  background: var(--red);
-  border: 3px solid rgba(255, 255, 255, 0.85);
-  clip-path: polygon(33% 0, 72% 0, 100% 16%, 100% 84%, 72% 100%, 33% 100%, 33% 82%, 0 82%, 0 18%, 33% 18%);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pixel-mark img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(3px 4px 0 rgba(0, 0, 0, 0.85));
+  transition: transform 160ms ease;
+}
+
+.pixel-mark:hover img {
+  transform: translateY(-2px) scale(1.05);
+}
+
+.pixel-mark:active img {
+  transform: translateY(1px) scale(0.94);
 }
 
 .asset-logo {
@@ -124,12 +150,13 @@ summary:focus-visible {
 }
 
 .start-character {
-  position: relative;
+  position: absolute;
   z-index: 1;
   display: block;
-  width: min(105vw, 520px);
+  left: clamp(-12px, -2vw, -2px);
+  bottom: 0;
+  width: min(66vw, 300px);
   max-width: none;
-  margin: clamp(20px, 6vh, 48px) 0 clamp(-96px, -18vw, -60px) clamp(-90px, -22vw, -60px);
   pointer-events: none;
 }
 
@@ -161,12 +188,21 @@ summary:focus-visible {
 
 .game-header {
   min-height: 112px;
+  flex-shrink: 0;
   display: grid;
   grid-template-columns: 1fr auto;
   grid-template-rows: auto auto;
   align-items: start;
   row-gap: 16px;
   padding-top: 8px;
+}
+
+.game-header.compact {
+  min-height: 0;
+  grid-template-rows: auto;
+  row-gap: 0;
+  padding-top: 2px;
+  margin-bottom: 18px;
 }
 
 .game-header .pixel-mark {
@@ -433,8 +469,8 @@ summary:focus-visible {
 }
 
 .profile-logo {
-  width: min(72%, 320px);
-  margin: 0 0 4px;
+  width: min(88%, 380px);
+  margin: 0 auto 14px;
 }
 
 .avatar-screen h1 {
@@ -459,15 +495,16 @@ summary:focus-visible {
 }
 
 .avatar-option {
+  position: relative;
   aspect-ratio: 1;
   width: 100%;
   max-width: 136px;
   border: 4px solid var(--ink);
   border-radius: 999px;
   background: #fff;
-  overflow: hidden;
+  overflow: visible;
   padding: 0;
-  transition: transform 160ms ease, box-shadow 160ms ease;
+  transition: transform 160ms ease, box-shadow 160ms ease, outline-color 160ms ease;
 }
 
 .avatar-option:not(.selected):hover {
@@ -479,13 +516,52 @@ summary:focus-visible {
   display: block;
   width: 100%;
   height: 100%;
+  border-radius: 999px;
   object-fit: cover;
 }
 
 .avatar-option.selected {
   background: var(--blue);
-  transform: translateY(-2px);
-  box-shadow: none;
+  transform: translateY(-5px) scale(1.06);
+  outline: 5px solid var(--yellow);
+  outline-offset: 4px;
+  box-shadow: 0 0 0 4px #fff, 6px 10px 0 var(--shadow), 0 0 26px rgba(255, 208, 0, 0.7);
+  animation: avatar-pick 420ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.avatar-check {
+  position: absolute;
+  top: -8px;
+  right: -6px;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  background: var(--cyan);
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  color: var(--ink);
+  box-shadow: 3px 4px 0 var(--shadow);
+  animation: pop-in 320ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  animation-delay: 80ms;
+}
+
+@keyframes avatar-pick {
+  0% {
+    transform: translateY(-2px) scale(1);
+  }
+  45% {
+    transform: translateY(-7px) scale(1.12);
+  }
+  100% {
+    transform: translateY(-5px) scale(1.06);
+  }
+}
+
+.avatar-next {
+  display: flex;
+  justify-content: center;
+  animation: pop-in 340ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
 }
 
 .mode-options {
@@ -566,11 +642,11 @@ summary:focus-visible {
 }
 
 .verify-card {
-  min-height: 336px;
+  min-height: 280px;
   display: grid;
-  gap: 16px;
+  gap: 14px;
   text-align: center;
-  padding: 58px 34px 28px;
+  padding: 40px 32px 26px;
 }
 
 .verify-card p {
@@ -660,7 +736,7 @@ summary:focus-visible {
   position: relative;
   z-index: 2;
   width: fit-content;
-  margin: 24px 6% 0 auto;
+  margin: 20px 6% 0 auto;
   background: var(--pink);
   border-radius: 999px;
   box-shadow: 5px 7px 0 var(--shadow);
@@ -671,12 +747,12 @@ summary:focus-visible {
 }
 
 .verify-character {
-  position: absolute;
-  left: -104px;
-  bottom: -108px;
-  width: min(98vw, 470px);
-  pointer-events: none;
+  display: block;
+  position: relative;
   z-index: 0;
+  width: min(56vw, 250px);
+  margin: -18px 0 0 clamp(-16px, -3vw, -6px);
+  pointer-events: none;
 }
 
 .verify-card {
@@ -685,15 +761,15 @@ summary:focus-visible {
 }
 
 .verify-screen {
-  min-height: calc(100svh - 180px);
-  padding-bottom: 260px;
+  position: relative;
+  padding-bottom: 12px;
 }
 
 .collect-guide {
   display: block;
-  width: 122%;
+  width: min(100%, 460px);
   max-width: none;
-  margin: 8px 0 clamp(-92px, -22vw, -78px) clamp(-84px, -20vw, -68px);
+  margin: 4px 0 16px;
   pointer-events: none;
 }
 
@@ -740,9 +816,25 @@ summary:focus-visible {
   filter: drop-shadow(3px 4px 0 var(--shadow));
 }
 
+.phone-stage > .howto-screen {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.howto-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-bottom: 6px;
+}
+
 .notebook-card {
-  margin-top: 46px;
-  padding: 34px 28px 28px;
+  margin-top: 40px;
+  padding: 26px 26px 22px;
   background: #fff;
   border-radius: 0 0 20px 20px;
   box-shadow: 8px 10px 0 var(--shadow);
@@ -815,17 +907,16 @@ summary:focus-visible {
 }
 
 .howto-character {
-  width: min(58vw, 300px);
-  margin-left: clamp(-56px, -16vw, -40px);
-  margin-top: clamp(-60px, -14vw, -40px);
+  width: min(46vw, 220px);
+  margin-left: clamp(-40px, -10vw, -24px);
+  margin-top: clamp(-40px, -8vw, -24px);
   pointer-events: none;
 }
 
 .howto-screen .sticker-button {
   display: block;
-  position: relative;
-  z-index: 2;
-  margin: 20px 0 0 auto;
+  flex: none;
+  margin: 14px 0 0 auto;
 }
 
 .progress-line {
@@ -945,16 +1036,70 @@ summary:focus-visible {
   border-radius: inherit;
 }
 
-.metric-tooltip {
-  margin: 10px 0 0;
-  padding: 12px 14px;
-  border-radius: 12px;
-  border: 2px solid #b8b8b8;
+.metric-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(5, 4, 30, 0.62);
+  backdrop-filter: blur(2px);
+}
+
+.metric-modal {
+  position: relative;
+  width: min(100%, 360px);
   background: #fff;
-  font-size: 0.85rem;
+  border: 3px solid var(--ink);
+  border-radius: 20px;
+  box-shadow: 8px 10px 0 var(--shadow);
+  padding: 32px 26px 26px;
+  text-align: left;
+}
+
+.metric-modal-dot {
+  display: block;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 3px solid var(--ink);
+  margin-bottom: 14px;
+}
+
+.metric-modal h3 {
+  margin: 0 0 10px;
+  font-size: 1.3rem;
+  color: var(--ink);
+}
+
+.metric-modal p {
+  margin: 0;
+  font-size: 1rem;
   font-weight: 600;
-  line-height: 1.4;
+  line-height: 1.5;
   color: #2a2a2a;
+}
+
+.metric-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink);
+  padding: 0;
+  transition: background-color 140ms ease, transform 140ms ease;
+}
+
+.metric-modal-close:hover {
+  background: var(--yellow);
+  transform: rotate(90deg);
 }
 
 .question-title {
@@ -1102,26 +1247,27 @@ summary:focus-visible {
 
 .score-card {
   display: grid;
-  grid-template-columns: 120px 1fr;
-  gap: 20px;
+  grid-template-columns: 96px 1fr;
+  gap: 16px;
   align-items: center;
-  padding: 28px;
+  padding: 22px 24px;
 }
 
 .score-card h1 {
   margin: 0;
   color: var(--navy);
+  font-size: 1.3rem;
 }
 
 .score-card strong {
   display: block;
   color: var(--red);
-  font-size: clamp(4rem, 16vw, 6rem);
+  font-size: clamp(3.2rem, 13vw, 4.6rem);
   line-height: 1;
 }
 
 .score-card p {
-  margin: 6px 0 0;
+  margin: 4px 0 0;
   color: var(--navy);
   font-weight: 900;
   font-style: italic;
@@ -1129,7 +1275,7 @@ summary:focus-visible {
 
 .trophy {
   display: block;
-  width: 112px;
+  width: 92px;
   height: auto;
 }
 
@@ -1137,13 +1283,13 @@ summary:focus-visible {
   grid-column: 1 / -1;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 18px;
+  gap: 14px;
 }
 
 .score-breakdown span {
   border-radius: 12px;
   box-shadow: 6px 8px 0 var(--shadow);
-  padding: 14px;
+  padding: 12px;
   text-align: center;
   font-weight: 900;
 }
@@ -1159,11 +1305,11 @@ summary:focus-visible {
 
 .score-breakdown b {
   display: block;
-  font-size: 2rem;
+  font-size: 1.7rem;
 }
 
 .reflection {
-  margin: 34px 0 24px;
+  margin: 20px 0 16px;
   background: var(--yellow);
   border-radius: 20px;
   box-shadow: 8px 10px 0 var(--shadow);
@@ -1223,9 +1369,9 @@ summary:focus-visible {
 
 .result-character {
   position: absolute;
-  left: -80px;
-  bottom: -40px;
-  width: min(72vw, 360px);
+  left: clamp(-16px, -3vw, -6px);
+  bottom: 0;
+  width: min(50vw, 220px);
   z-index: 0;
   pointer-events: none;
 }
@@ -1238,10 +1384,11 @@ summary:focus-visible {
 
 .result-actions {
   display: grid;
-  gap: 18px;
+  gap: 14px;
   justify-items: end;
-  margin-top: 44px;
-  margin-left: 34%;
+  margin-top: 22px;
+  margin-left: 40%;
+  padding-bottom: 12px;
 }
 
 .room-panel,
@@ -1409,8 +1556,12 @@ summary:focus-visible {
   animation: card-in 300ms ease backwards;
 }
 
-.metric-tooltip {
-  animation: card-in 220ms ease backwards;
+.metric-modal-backdrop {
+  animation: card-in 180ms ease backwards;
+}
+
+.metric-modal {
+  animation: pop-in 260ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
 }
 
 .feedback-suggested {
@@ -1432,8 +1583,11 @@ summary:focus-visible {
   .choice,
   .feedback,
   .avatar-option,
+  .avatar-check,
+  .avatar-next,
   .reflection-list,
-  .metric-tooltip,
+  .metric-modal-backdrop,
+  .metric-modal,
   .feedback-suggested,
   .image-start-button {
     animation: none !important;

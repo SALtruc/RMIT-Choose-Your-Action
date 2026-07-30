@@ -9,6 +9,7 @@ import {
   ListChecks,
   RotateCcw,
   Share2,
+  X,
 } from "lucide-react";
 import "./styles.css";
 import {
@@ -88,6 +89,25 @@ function buildSnapshot(state: {
   };
 }
 
+function LogoBadge({
+  onClick,
+  className,
+}: {
+  onClick: () => void;
+  className?: string;
+}) {
+  return (
+    <button
+      className={className ? `pixel-mark ${className}` : "pixel-mark"}
+      type="button"
+      onClick={onClick}
+      aria-label="Return to the start screen"
+    >
+      <img src="/assets/logo-badge.png" alt="" aria-hidden="true" />
+    </button>
+  );
+}
+
 function StickerLogo({ compact = false }: { compact?: boolean }) {
   return (
     <div className={compact ? "logo sticker-logo compact" : "logo sticker-logo"}>
@@ -108,17 +128,19 @@ function Header({
   avatarId,
   onBack,
   onHelp,
+  onLogoClick,
   showAvatar = true,
 }: {
   avatarId: string | null;
   onBack?: () => void;
   onHelp?: () => void;
+  onLogoClick: () => void;
   showAvatar?: boolean;
 }) {
   const avatar = avatars.find((item) => item.id === avatarId) ?? avatars[0];
   return (
-    <header className="game-header">
-      <div className="pixel-mark" aria-hidden="true" />
+    <header className={onBack || onHelp ? "game-header" : "game-header compact"}>
+      <LogoBadge onClick={onLogoClick} />
       {showAvatar ? (
         <div className="header-avatar">
           <img src={avatar.img} alt={avatar.label} />
@@ -130,16 +152,12 @@ function Header({
         <button className="back-button" type="button" onClick={onBack}>
           &lt; Back
         </button>
-      ) : (
-        <span aria-hidden="true" />
-      )}
+      ) : null}
       {onHelp ? (
         <button className="help-button" type="button" aria-label="How to play" onClick={onHelp}>
           ?
         </button>
-      ) : (
-        <span aria-hidden="true" />
-      )}
+      ) : null}
     </header>
   );
 }
@@ -170,21 +188,19 @@ function StickerButton({
 function MetricCard({
   metric,
   value,
-  open,
-  onToggle,
+  onOpen,
 }: {
   metric: MetricKey;
   value: number;
-  open: boolean;
-  onToggle: () => void;
+  onOpen: () => void;
 }) {
   return (
     <div className="metric-card">
       <button
         className="metric-card-head"
         type="button"
-        onClick={onToggle}
-        aria-expanded={open}
+        onClick={onOpen}
+        aria-haspopup="dialog"
       >
         {metricLabels[metric]}
         <i className="info-dot" aria-hidden="true">
@@ -194,7 +210,27 @@ function MetricCard({
       <span className="meter">
         <i style={{ width: `${value}%`, background: metricColors[metric] }} />
       </span>
-      {open ? <p className="metric-tooltip">{metricDescriptions[metric]}</p> : null}
+    </div>
+  );
+}
+
+function MetricModal({ metric, onClose }: { metric: MetricKey; onClose: () => void }) {
+  return (
+    <div className="metric-modal-backdrop" role="presentation" onClick={onClose}>
+      <div
+        className="metric-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label={metricLabels[metric]}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button className="metric-modal-close" type="button" onClick={onClose} aria-label="Close">
+          <X size={18} strokeWidth={3} />
+        </button>
+        <i className="metric-modal-dot" style={{ background: metricColors[metric] }} aria-hidden="true" />
+        <h3>{metricLabels[metric]}</h3>
+        <p>{metricDescriptions[metric]}</p>
+      </div>
     </div>
   );
 }
@@ -245,7 +281,7 @@ function RoomControls({
 export default function App() {
   const stageRef = useRef<HTMLElement | null>(null);
   const [screen, setScreen] = useState<Screen>("start");
-  const [avatarId, setAvatarId] = useState<string | null>("designer");
+  const [avatarId, setAvatarId] = useState<string | null>(null);
   const [mode, setMode] = useState<Mode | null>(null);
   const [studentId, setStudentId] = useState("");
   const [profile, setProfile] = useState({ year: "", program: "", accessCode: "" });
@@ -475,7 +511,7 @@ export default function App() {
 
   const restart = () => {
     setScreen("start");
-    setAvatarId("designer");
+    setAvatarId(null);
     setMode(null);
     setStudentId("");
     setProfile({ year: "", program: "", accessCode: "" });
@@ -535,12 +571,13 @@ export default function App() {
             showAvatar={showHeaderAvatar}
             onBack={showHeaderBack ? goBack : undefined}
             onHelp={showHeaderHelp ? () => openHowto() : undefined}
+            onLogoClick={restart}
           />
         ) : null}
 
         {screen === "start" ? (
           <section className="start-screen">
-            <div className="pixel-mark" aria-hidden="true" />
+            <LogoBadge onClick={restart} />
             <img className="start-logo" src="/assets/choose-logo.png" alt="Choose Your Action" />
             <img className="start-bubble" src="/assets/start-bubble-real.png" alt="Choose your action. Think before you act." />
             <button className="image-start-button" type="button" onClick={() => setScreen("avatar")}>
@@ -552,7 +589,7 @@ export default function App() {
 
         {screen === "avatar" ? (
           <section className="avatar-screen">
-            <div className="pixel-mark setup-mark" aria-hidden="true" />
+            <LogoBadge onClick={restart} className="setup-mark" />
             <h1>
               But first, let's choose your <span>avatar</span>
             </h1>
@@ -564,14 +601,24 @@ export default function App() {
                   type="button"
                   onClick={() => setAvatarId(avatar.id)}
                   aria-label={avatar.label}
+                  aria-pressed={avatarId === avatar.id}
                 >
                   <img src={avatar.img} alt="" />
+                  {avatarId === avatar.id ? (
+                    <span className="avatar-check" aria-hidden="true">
+                      <Check size={20} strokeWidth={4} />
+                    </span>
+                  ) : null}
                 </button>
               ))}
             </div>
-            <StickerButton tone="yellow" disabled={!avatarId} onClick={() => setScreen("verify")}>
-              Next
-            </StickerButton>
+            {avatarId ? (
+              <div className="avatar-next">
+                <StickerButton tone="yellow" onClick={() => setScreen("verify")}>
+                  Next
+                </StickerButton>
+              </div>
+            ) : null}
           </section>
         ) : null}
 
@@ -693,37 +740,39 @@ export default function App() {
 
         {screen === "howto" ? (
           <section className="howto-screen">
-            <div className="notebook-card">
-              <div className="tab-strip" aria-hidden="true">
-                {["#ed1b2f", "#ffd000", "#fff", "#05004b", "#f15add", "#fff", "#4bd2db", "#05004b"].map(
-                  (color, index) => (
-                    <i key={`${color}-${index}`} style={{ background: color }} />
-                  ),
-                )}
+            <div className="howto-scroll">
+              <div className="notebook-card">
+                <div className="tab-strip" aria-hidden="true">
+                  {["#ed1b2f", "#ffd000", "#fff", "#05004b", "#f15add", "#fff", "#4bd2db", "#05004b"].map(
+                    (color, index) => (
+                      <i key={`${color}-${index}`} style={{ background: color }} />
+                    ),
+                  )}
+                </div>
+                <img className="scene-badge" src="/assets/scene-badge.png" alt="" aria-hidden="true" />
+                <h1>How to play</h1>
+                <ul>
+                  <li>You will be placed inside a real workplace scenario that interns and entry-level employees commonly face.</li>
+                  <li>Read carefully and choose one of three responses.</li>
+                  <li>Learn from the consequences and reflect on your choices.</li>
+                </ul>
+                <div className="badges">
+                  <span>
+                    <i className="badge-icon">
+                      <ListChecks size={18} />
+                    </i>
+                    11 scenarios
+                  </span>
+                  <span>
+                    <i className="badge-icon">
+                      <Clock size={18} />
+                    </i>
+                    No time limit
+                  </span>
+                </div>
               </div>
-              <img className="scene-badge" src="/assets/scene-badge.png" alt="" aria-hidden="true" />
-              <h1>How to play</h1>
-              <ul>
-                <li>You will be placed inside a real workplace scenario that interns and entry-level employees commonly face.</li>
-                <li>Read carefully and choose one of three responses.</li>
-                <li>Learn from the consequences and reflect on your choices.</li>
-              </ul>
-              <div className="badges">
-                <span>
-                  <i className="badge-icon">
-                    <ListChecks size={18} />
-                  </i>
-                  11 scenarios
-                </span>
-                <span>
-                  <i className="badge-icon">
-                    <Clock size={18} />
-                  </i>
-                  No time limit
-                </span>
-              </div>
+              <img className="howto-character" src="/assets/start-character.png" alt="" />
             </div>
-            <img className="howto-character" src="/assets/start-character.png" alt="" />
             <StickerButton
               tone="red"
               onClick={() => {
@@ -761,11 +810,13 @@ export default function App() {
                   key={metric}
                   metric={metric}
                   value={selectedChoice ? metrics[metric] : scenario.startingMetrics[metric]}
-                  open={openMetric === metric}
-                  onToggle={() => setOpenMetric((current) => (current === metric ? null : metric))}
+                  onOpen={() => setOpenMetric(metric)}
                 />
               ))}
             </div>
+            {openMetric ? (
+              <MetricModal metric={openMetric} onClose={() => setOpenMetric(null)} />
+            ) : null}
             <h2 className="question-title">What do you do?</h2>
             <div className="choices">
               {scenario.choices.map((choice) => (
