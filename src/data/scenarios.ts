@@ -12,6 +12,11 @@ export type Choice = {
   feedback: string;
 };
 
+export type SuggestedResponse = {
+  sayTo: string;
+  message: string;
+};
+
 export type Scenario = {
   id: number;
   title: string;
@@ -20,6 +25,7 @@ export type Scenario = {
   cardTone: "navy" | "pink";
   startingMetrics: Metrics;
   choices: Choice[];
+  suggestedResponse: SuggestedResponse;
 };
 
 export const metricLabels: Record<MetricKey, string> = {
@@ -85,6 +91,11 @@ export const scenarios: Scenario[] = [
         feedback: "Partially right. Your concern is valid, but asking for clarification first is stronger.",
       },
     ],
+    suggestedResponse: {
+      sayTo: "HR representative, on your first day before signing",
+      message:
+        "I appreciate the offer and I'm excited to get started. Before I sign, could we take a few minutes to complete the missing sections, particularly the salary, working hours, and job responsibilities? I want to make sure we're both clear on the terms before I commit.",
+    },
   },
   {
     id: 2,
@@ -120,6 +131,11 @@ export const scenarios: Scenario[] = [
         feedback: "Risky choice. Protect your records without mishandling confidential documents.",
       },
     ],
+    suggestedResponse: {
+      sayTo: "HR representative, immediately after signing the contract",
+      message:
+        "Thank you for walking me through the contract. It's standard practice for both parties to keep a signed copy. Could I receive mine digitally or as a printout today? I just want to make sure I have it for my own records.",
+    },
   },
   {
     id: 3,
@@ -155,6 +171,11 @@ export const scenarios: Scenario[] = [
         feedback: "Good call. Clarifying expectations keeps the conversation professional.",
       },
     ],
+    suggestedResponse: {
+      sayTo: "Your direct supervisor, privately after being asked to stay late again",
+      message:
+        "I'm happy to support the team and I want to do a good job. Could we clarify what the expected working hours are for my internship, and whether overtime arrangements such as pay or time off in lieu apply when I stay late? I just want to make sure I understand what's expected.",
+    },
   },
   {
     id: 4,
@@ -190,6 +211,11 @@ export const scenarios: Scenario[] = [
         feedback: "Risky choice. The concern is valid, but the channel and tone matter.",
       },
     ],
+    suggestedResponse: {
+      sayTo: "Your manager, privately and directly, not in the group chat",
+      message:
+        "I'm willing to come in on Sunday to help with this. I just want to confirm how it will be recorded. Does this apply to overtime pay or compensatory time off? I want to make sure I understand the arrangement before I commit.",
+    },
   },
   {
     id: 5,
@@ -225,6 +251,11 @@ export const scenarios: Scenario[] = [
         feedback: "Good call. A professional salary question is reasonable and evidence-based.",
       },
     ],
+    suggestedResponse: {
+      sayTo: "HR representative, before signing the offer letter",
+      message:
+        "Thank you for the offer. I'm genuinely interested in the role. Before I confirm, could you share a breakdown of how the salary is structured and confirm that it meets the applicable regional minimum wage? I want to make an informed decision.",
+    },
   },
   {
     id: 6,
@@ -260,6 +291,11 @@ export const scenarios: Scenario[] = [
         feedback: "Risky choice. Entitlements still need proper process.",
       },
     ],
+    suggestedResponse: {
+      sayTo: "Your team leader or HR, in writing via email or the official leave system",
+      message:
+        "I'd like to submit a leave request for [dates]. I've checked the leave policy and I'm giving the required notice in advance. I'm also happy to plan handovers ahead of time to make sure nothing is disrupted while I'm away.",
+    },
   },
   {
     id: 7,
@@ -295,6 +331,11 @@ export const scenarios: Scenario[] = [
         feedback: "Partially right only in intent. Proving yourself is not worth unsafe work.",
       },
     ],
+    suggestedResponse: {
+      sayTo: "The colleague or supervisor who assigned the task, immediately and calmly",
+      message:
+        "I want to help with this task, but I haven't received training on this equipment yet. I wouldn't feel safe operating it without proper guidance. Could someone walk me through it first, or is there an alternative task I can take on in the meantime?",
+    },
   },
   {
     id: 8,
@@ -330,6 +371,11 @@ export const scenarios: Scenario[] = [
         feedback: "Good call. A clear check-in turns frustration into a constructive request.",
       },
     ],
+    suggestedResponse: {
+      sayTo: "Your direct supervisor, in a private one-on-one meeting or via message",
+      message:
+        "I've really enjoyed being part of the team and I'm glad to help with admin work. I'd love to also get some exposure to marketing tasks so I can meet the learning objectives of my internship. Could we schedule a quick check-in to align on my goals and how I can contribute more broadly?",
+    },
   },
   {
     id: 9,
@@ -365,6 +411,11 @@ export const scenarios: Scenario[] = [
         feedback: "Good call. You communicated clearly and protected your recovery.",
       },
     ],
+    suggestedResponse: {
+      sayTo: "Your supervisor, by message on the day you are sick",
+      message:
+        "I'm on approved sick leave today and have submitted my medical certificate. I want to be transparent about my situation rather than work through illness. Is it possible to reassign the meeting or reschedule it? I'll follow up on everything as soon as I'm back.",
+    },
   },
   {
     id: 10,
@@ -400,6 +451,11 @@ export const scenarios: Scenario[] = [
         feedback: "Risky choice. Hiding sources is an integrity problem.",
       },
     ],
+    suggestedResponse: {
+      sayTo: "Your manager, before submitting",
+      message:
+        "I've used an AI tool to draft this report and I've reviewed and verified the key data points. Here is the final version, let me know if you'd like me to double-check any section. AI assists, humans verify. No matter what tool you use, you remain accountable for the accuracy and integrity of anything you submit under your name.",
+    },
   },
   {
     id: 11,
@@ -435,6 +491,11 @@ export const scenarios: Scenario[] = [
         feedback: "Partially right. Staying safe matters, but silence can leave harm unchallenged.",
       },
     ],
+    suggestedResponse: {
+      sayTo: "The colleague who made the comment, calmly and directly in the moment; then follow up with HR if it continues",
+      message:
+        "I want to flag that comment may not have come across the way it was intended. I'd feel more comfortable if we kept our discussions focused on the work. If this comes up again, I'd like to raise it with HR so we can make sure everyone feels respected in this space.",
+    },
   },
 ];
 

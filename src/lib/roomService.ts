@@ -3,7 +3,6 @@ import type { RealtimeChannel } from "@supabase/supabase-js";
 
 export type GameSnapshot = {
   screen: string;
-  mode: string | null;
   avatarId: string | null;
   studentId: string;
   profile: {

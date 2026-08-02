@@ -32,8 +32,7 @@ import {
   type GameSnapshot,
 } from "./lib/roomService";
 
-type Screen = "start" | "avatar" | "mode" | "verify" | "profile" | "howto" | "game" | "result";
-type Mode = "individual" | "leadership";
+type Screen = "start" | "avatar" | "verify" | "profile" | "howto" | "game" | "result";
 
 const avatars = [
   { id: "designer", label: "Design lead", hue: "#f15add", img: "/assets/avatars/designer.png" },
@@ -75,7 +74,6 @@ const reflectionQuestions = [
 
 function buildSnapshot(state: {
   screen: Screen;
-  mode: Mode | null;
   avatarId: string | null;
   studentId: string;
   profile: { year: string; program: string; accessCode: string };
@@ -282,7 +280,6 @@ export default function App() {
   const stageRef = useRef<HTMLElement | null>(null);
   const [screen, setScreen] = useState<Screen>("start");
   const [avatarId, setAvatarId] = useState<string | null>(null);
-  const [mode, setMode] = useState<Mode | null>(null);
   const [studentId, setStudentId] = useState("");
   const [profile, setProfile] = useState({ year: "", program: "", accessCode: "" });
   const [scenarioIndex, setScenarioIndex] = useState(0);
@@ -328,7 +325,7 @@ export default function App() {
       );
 
       gsap.fromTo(
-        activeSection.querySelectorAll(".avatar-option, .mode-card, .choice, .metric-card, .badges span"),
+        activeSection.querySelectorAll(".avatar-option, .choice, .metric-card, .badges span"),
         { autoAlpha: 0, y: 18, scale: 0.96 },
         {
           autoAlpha: 1,
@@ -426,7 +423,6 @@ export default function App() {
 
   const snapshot = buildSnapshot({
     screen,
-    mode,
     avatarId,
     studentId,
     profile,
@@ -438,13 +434,12 @@ export default function App() {
   useEffect(() => {
     if (!roomCode || !isRealtimeConfigured) return;
     void saveRoom(roomCode, snapshot).catch(() => setRoomMessage("Room sync failed. Check Supabase rules."));
-  }, [roomCode, screen, mode, avatarId, studentId, profile, scenarioIndex, selectedChoiceId, choiceHistory]);
+  }, [roomCode, screen, avatarId, studentId, profile, scenarioIndex, selectedChoiceId, choiceHistory]);
 
   useEffect(() => {
     if (!roomCode) return undefined;
     return subscribeToRoom(roomCode, (next) => {
       setScreen(next.screen as Screen);
-      setMode(next.mode as Mode | null);
       setAvatarId(next.avatarId);
       setStudentId(next.studentId);
       setProfile(next.profile);
@@ -477,7 +472,7 @@ export default function App() {
       setHowtoReturnScreen(null);
       return;
     }
-    const order: Screen[] = ["start", "avatar", "verify", "profile", "mode", "howto", "game", "result"];
+    const order: Screen[] = ["start", "avatar", "verify", "profile", "howto", "game", "result"];
     const current = order.indexOf(screen);
     setScreen(order[Math.max(0, current - 1)]);
   };
@@ -512,7 +507,6 @@ export default function App() {
   const restart = () => {
     setScreen("start");
     setAvatarId(null);
-    setMode(null);
     setStudentId("");
     setProfile({ year: "", program: "", accessCode: "" });
     setScenarioIndex(0);
@@ -545,7 +539,6 @@ export default function App() {
       setRoomCode(normalized);
       setRoomMessage("Joined synced room.");
       setScreen(next.screen as Screen);
-      setMode(next.mode as Mode | null);
       setAvatarId(next.avatarId);
       setStudentId(next.studentId);
       setProfile(next.profile);
@@ -622,42 +615,6 @@ export default function App() {
           </section>
         ) : null}
 
-        {screen === "mode" ? (
-          <section className="mode-screen">
-            <img className="asset-logo mode-logo" src="/assets/choose-logo.png" alt="Choose Your Action" />
-            <p className="ribbon red">First, choose the mode you want to challenge</p>
-            <div className="mode-options">
-              <button
-                type="button"
-                className={mode === "individual" ? "mode-card selected" : "mode-card"}
-                onClick={() => setMode("individual")}
-              >
-                <img className="mode-illustration" src="/assets/mode-person.png" alt="" aria-hidden="true" />
-                <span>
-                  <strong>Individual Challenge</strong>
-                  Self-paced. Choose your responses and earn speed + accuracy points.
-                </span>
-                <i>{mode === "individual" ? <Check size={22} /> : null}</i>
-              </button>
-              <button
-                type="button"
-                className={mode === "leadership" ? "mode-card selected" : "mode-card"}
-                onClick={() => setMode("leadership")}
-              >
-                <img className="mode-illustration" src="/assets/mode-crown.png" alt="" aria-hidden="true" />
-                <span>
-                  <strong>Leadership Role</strong>
-                  You're the team lead. Your decisions affect the whole team's outcomes.
-                </span>
-                <i>{mode === "leadership" ? <Check size={22} /> : null}</i>
-              </button>
-            </div>
-            <StickerButton tone="yellow" disabled={!mode} onClick={() => openHowto("mode")}>
-              Next
-            </StickerButton>
-          </section>
-        ) : null}
-
         {screen === "verify" ? (
           <section className="verify-screen">
             <img className="asset-logo verify-logo" src="/assets/choose-logo.png" alt="Choose Your Action" />
@@ -671,11 +628,11 @@ export default function App() {
               <p>This is exclusively for</p>
               <h2>RMIT Students</h2>
               <label>
-                <span>Enter your Student ID</span>
                 <input
                   value={studentId}
                   onChange={(event) => setStudentId(event.target.value)}
-                  placeholder="s1234567"
+                  placeholder="Enter your Student ID"
+                  aria-label="Student ID"
                   required
                 />
               </label>
@@ -699,7 +656,7 @@ export default function App() {
               className="profile-form"
               onSubmit={(event) => {
                 event.preventDefault();
-                setScreen("mode");
+                openHowto("profile");
               }}
             >
               <label>
@@ -844,19 +801,18 @@ export default function App() {
                   </div>
                   <p>{selectedChoice.feedback.replace(`${outcomeLabel[selectedChoice.outcome]}. `, "")}</p>
                   <span className="feedback-points">Accuracy: +{selectedChoice.score} pts</span>
-                  {selectedChoice.outcome !== "good" ? (
-                    <button
-                      className="feedback-reveal"
-                      type="button"
-                      onClick={() => setRevealSuggested((value) => !value)}
-                    >
-                      {revealSuggested ? "Hide the suggested response" : "Tap to see the suggested response"}
-                    </button>
-                  ) : null}
-                  {revealSuggested && selectedChoice.outcome !== "good" ? (
-                    <p className="feedback-suggested">
-                      {scenario.choices.find((choice) => choice.outcome === "good")?.label}
-                    </p>
+                  <button
+                    className="feedback-reveal"
+                    type="button"
+                    onClick={() => setRevealSuggested((value) => !value)}
+                  >
+                    {revealSuggested ? "Hide the suggested response" : "Tap to see the suggested response"}
+                  </button>
+                  {revealSuggested ? (
+                    <div className="feedback-suggested">
+                      <p className="feedback-suggested-context">Say to: {scenario.suggestedResponse.sayTo}</p>
+                      <p className="feedback-suggested-quote">&ldquo;{scenario.suggestedResponse.message}&rdquo;</p>
+                    </div>
                   ) : null}
                 </div>
                 <StickerButton tone="yellow" onClick={nextScenario}>
@@ -906,7 +862,7 @@ export default function App() {
               <StickerButton tone="red" onClick={restart} icon={<RotateCcw size={24} />}>
                 Of course, LET'S GO!
               </StickerButton>
-              <StickerButton tone="white" onClick={() => setScreen("mode")} icon={<ArrowRight size={24} />}>
+              <StickerButton tone="white" onClick={restart} icon={<ArrowRight size={24} />}>
                 No, let's go back to homepage
               </StickerButton>
             </div>
@@ -923,7 +879,6 @@ export default function App() {
         />
         <section className="side-card">
           <h2>Session</h2>
-          <p>{mode ? `${mode === "individual" ? "Individual" : "Leadership"} challenge` : "Choose a mode to start."}</p>
           <p>{studentId ? `SID ${studentId}` : "Student ID not verified yet."}</p>
           <p>
             Scenario {Math.min(scenarioIndex + 1, scenarios.length)} / {scenarios.length}

@@ -365,12 +365,10 @@ summary:focus-visible {
   font-size: clamp(1rem, 4vw, 1.35rem);
 }
 
-.mode-screen .ribbon.red,
 .ribbon.red.flag {
   width: calc(100% - 18px);
 }
 
-.mode-screen .ribbon.red::after,
 .ribbon.red.flag::after {
   content: "";
   position: absolute;
@@ -461,7 +459,6 @@ summary:focus-visible {
 }
 
 .avatar-logo,
-.mode-logo,
 .verify-logo,
 .profile-logo,
 .result-logo {
@@ -568,70 +565,6 @@ summary:focus-visible {
   animation: pop-in 340ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
 }
 
-.mode-options {
-  display: grid;
-  gap: 22px;
-  margin: 34px 0 44px;
-}
-
-.mode-card {
-  min-height: 108px;
-  display: grid;
-  grid-template-columns: 74px 1fr 32px;
-  align-items: center;
-  gap: 14px;
-  text-align: left;
-  background: #fff;
-  border: 3px solid var(--ink);
-  border-radius: 18px;
-  padding: 18px 22px;
-  box-shadow: 8px 10px 0 var(--shadow);
-}
-
-.mode-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 9px 12px 0 var(--shadow);
-}
-
-.mode-card strong {
-  display: block;
-  margin-bottom: 10px;
-  color: var(--yellow);
-  font-family: Impact, "Arial Black", sans-serif;
-  text-transform: uppercase;
-  -webkit-text-stroke: 1px var(--ink);
-  text-shadow: 3px 4px 0 var(--shadow);
-  font-size: clamp(1.25rem, 5vw, 1.75rem);
-}
-
-.mode-card:nth-child(2) strong {
-  color: var(--pink);
-}
-
-.mode-illustration {
-  display: block;
-  width: 56px;
-  height: 56px;
-  object-fit: contain;
-  align-self: center;
-  justify-self: center;
-}
-
-.mode-card i {
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border: 3px solid var(--ink);
-  border-radius: 999px;
-  background: #fff;
-}
-
-.mode-card.selected i {
-  background: var(--ink);
-  color: #fff;
-}
-
 .verify-screen,
 .profile-screen,
 .howto-screen,
@@ -698,7 +631,7 @@ summary:focus-visible {
   text-align: center;
 }
 
-.verify-card label span {
+.verify-card input::placeholder {
   color: #cfcfcf;
   font-weight: 900;
 }
@@ -821,19 +754,7 @@ summary:focus-visible {
   filter: drop-shadow(3px 4px 0 var(--shadow));
 }
 
-.phone-stage > .howto-screen {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: hidden;
-}
-
 .howto-scroll {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
   padding-bottom: 6px;
 }
 
@@ -1242,17 +1163,26 @@ summary:focus-visible {
   text-underline-offset: 3px;
 }
 
-.feedback-reveal:hover {
-  color: var(--blue);
-}
-
 .feedback-suggested {
+  display: grid;
+  gap: 6px;
   margin: 0;
   padding: 14px 16px;
   border-radius: 12px;
   background: #f2f6ff;
+}
+
+.feedback-suggested-context {
+  margin: 0;
   font-weight: 700;
-  color: var(--navy);
+  font-style: italic;
+  color: var(--ink);
+}
+
+.feedback-suggested-quote {
+  margin: 0;
+  font-weight: 700;
+  color: var(--ink);
 }
 
 .feedback .sticker-button {
@@ -1545,19 +1475,6 @@ summary:focus-visible {
 .avatar-grid button:nth-child(7) { animation-delay: 240ms; }
 .avatar-grid button:nth-child(8) { animation-delay: 280ms; }
 
-.mode-card {
-  transition: transform 160ms ease, box-shadow 160ms ease;
-}
-
-.mode-card:active {
-  transform: translate(2px, 3px);
-  box-shadow: 5px 6px 0 var(--shadow);
-}
-
-.mode-card.selected {
-  transform: translateY(-2px);
-}
-
 .image-start-button img {
   animation: gentle-pulse 3.2s ease-in-out infinite;
 }
@@ -1611,7 +1528,6 @@ summary:focus-visible {
   .progress-line span,
   .sticker-button,
   .choice,
-  .mode-card,
   .avatar-option,
   .back-button,
   .help-button {
