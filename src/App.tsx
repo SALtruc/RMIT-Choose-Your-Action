@@ -656,8 +656,10 @@ export default function App() {
                 Next
               </StickerButton>
             </form>
-            <p className="verify-note">Please enter your SID to verify!</p>
-            <img className="verify-character" src="/assets/start-character.png" alt="" />
+            <div className="verify-footer">
+              <img className="verify-character" src="/assets/start-character.png" alt="" />
+              <p className="verify-note">Please enter your SID to verify!</p>
+            </div>
           </section>
         ) : null}
 

@@ -496,7 +496,7 @@ summary:focus-visible {
 }
 
 .verify-logo {
-  margin: 0 auto 14px;
+  margin: 0 auto clamp(4px, 1.6svh, 14px);
 }
 
 .profile-logo {
@@ -611,24 +611,24 @@ summary:focus-visible {
 }
 
 .verify-card {
-  min-height: 250px;
+  min-height: min(280px, 28svh);
   display: grid;
-  gap: 12px;
+  gap: clamp(6px, 1.4svh, 16px);
   text-align: center;
-  padding: 32px 30px 22px;
+  padding: clamp(18px, 3.6svh, 42px) clamp(24px, 7vw, 34px) clamp(12px, 2svh, 26px);
   margin-top: 10px;
 }
 
 .verify-card p {
   margin: 0;
   font-weight: 800;
-  font-size: 1.5rem;
+  font-size: clamp(1.15rem, 4.5vw, 1.5rem);
 }
 
 .verify-card h2 {
   margin: 0;
   color: var(--red);
-  font-size: clamp(1.7rem, 7.5vw, 2.6rem);
+  font-size: clamp(1.7rem, 7vw, 2.6rem);
 }
 
 .verify-card label,
@@ -651,7 +651,7 @@ summary:focus-visible {
 }
 
 .verify-card input {
-  min-height: 40px;
+  min-height: clamp(40px, 6svh, 52px);
   width: 100%;
   border: 0;
   border-bottom: 2px solid #d8d8d8;
@@ -660,6 +660,7 @@ summary:focus-visible {
   background: transparent;
   box-shadow: none;
   font-weight: 700;
+  font-size: clamp(1.05rem, 4.5vw, 1.3rem);
   text-align: center;
 }
 
@@ -702,26 +703,36 @@ summary:focus-visible {
   transform: rotate(45deg);
 }
 
+.verify-footer {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: clamp(6px, 1.4svh, 16px);
+}
+
 .verify-note {
   position: relative;
   z-index: 2;
+  flex: 1 1 auto;
   width: fit-content;
-  margin: 20px 6% 0 auto;
+  margin: 0;
   background: var(--pink);
   border-radius: 999px;
   box-shadow: 5px 7px 0 var(--shadow);
   padding: 12px 18px;
-  font-size: 1rem;
+  font-size: clamp(0.85rem, 3.6vw, 1rem);
   font-weight: 900;
   text-align: center;
 }
 
 .verify-character {
   display: block;
+  flex: none;
   position: relative;
   z-index: 0;
-  width: min(46vw, 205px);
-  margin: -12px 0 0 clamp(-16px, -3vw, -6px);
+  width: min(26vw, 22svh, 150px);
+  margin: 0 0 0 clamp(-16px, -3vw, -6px);
   pointer-events: none;
 }
 
@@ -734,6 +745,7 @@ summary:focus-visible {
 .phone-stage > .profile-screen {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
