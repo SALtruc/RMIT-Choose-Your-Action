@@ -278,6 +278,7 @@ function RoomControls({
 
 export default function App() {
   const stageRef = useRef<HTMLElement | null>(null);
+  const feedbackRef = useRef<HTMLElement | null>(null);
   const [screen, setScreen] = useState<Screen>("start");
   const [avatarId, setAvatarId] = useState<string | null>(null);
   const [studentId, setStudentId] = useState("");
@@ -421,6 +422,11 @@ export default function App() {
     stage?.scrollTo({ top: 0, behavior: "instant" });
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [screen]);
+
+  useEffect(() => {
+    if (!selectedChoiceId) return;
+    feedbackRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [selectedChoiceId, revealSuggested]);
 
   const snapshot = buildSnapshot({
     screen,
@@ -584,27 +590,29 @@ export default function App() {
         {screen === "avatar" ? (
           <section className="avatar-screen">
             <LogoBadge onClick={restart} className="setup-mark" />
-            <h1>
-              But first, let's choose your <span>avatar</span>
-            </h1>
-            <div className="avatar-grid">
-              {avatars.map((avatar) => (
-                <button
-                  key={avatar.id}
-                  className={avatarId === avatar.id ? "avatar-option selected" : "avatar-option"}
-                  type="button"
-                  onClick={() => setAvatarId(avatar.id)}
-                  aria-label={avatar.label}
-                  aria-pressed={avatarId === avatar.id}
-                >
-                  <img src={avatar.img} alt="" />
-                  {avatarId === avatar.id ? (
-                    <span className="avatar-check" aria-hidden="true">
-                      <Check size={20} strokeWidth={4} />
-                    </span>
-                  ) : null}
-                </button>
-              ))}
+            <div className="avatar-scroll">
+              <h1>
+                But first, let's choose your <span>avatar</span>
+              </h1>
+              <div className="avatar-grid">
+                {avatars.map((avatar) => (
+                  <button
+                    key={avatar.id}
+                    className={avatarId === avatar.id ? "avatar-option selected" : "avatar-option"}
+                    type="button"
+                    onClick={() => setAvatarId(avatar.id)}
+                    aria-label={avatar.label}
+                    aria-pressed={avatarId === avatar.id}
+                  >
+                    <img src={avatar.img} alt="" />
+                    {avatarId === avatar.id ? (
+                      <span className="avatar-check" aria-hidden="true">
+                        <Check size={20} strokeWidth={4} />
+                      </span>
+                    ) : null}
+                  </button>
+                ))}
+              </div>
             </div>
             {avatarId ? (
               <div className="avatar-next">
@@ -815,7 +823,7 @@ export default function App() {
               ))}
             </div>
             {selectedChoice ? (
-              <aside className="feedback">
+              <aside className="feedback" ref={feedbackRef}>
                 <h3 className="feedback-heading">Here's what this costs you</h3>
                 <div className="feedback-card">
                   <div className="feedback-head">
