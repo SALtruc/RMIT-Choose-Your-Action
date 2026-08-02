@@ -690,7 +690,7 @@ export default function App() {
                   required
                 />
               </label>
-              <label className="access-code-label">
+              <label>
                 <span className="ribbon red flag access-ribbon">
                   Access code <em>(Optional)</em>
                   <button
@@ -700,18 +700,12 @@ export default function App() {
                     aria-expanded={showAccessInfo}
                     onClick={(event) => {
                       event.preventDefault();
-                      setShowAccessInfo((value) => !value);
+                      setShowAccessInfo(true);
                     }}
                   >
                     <Info size={22} />
                   </button>
                 </span>
-                {showAccessInfo ? (
-                  <p className="access-info-tip" role="tooltip">
-                    Optional — enter the code your facilitator shared so your results can be grouped with your class
-                    or event.
-                  </p>
-                ) : null}
                 <input
                   value={profile.accessCode}
                   onChange={(event) => setProfile((item) => ({ ...item, accessCode: event.target.value }))}
@@ -722,6 +716,35 @@ export default function App() {
                 Next
               </StickerButton>
             </form>
+            {showAccessInfo ? (
+              <div
+                className="metric-modal-backdrop"
+                role="presentation"
+                onClick={() => setShowAccessInfo(false)}
+              >
+                <div
+                  className="metric-modal"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label="What is an access code?"
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  <button
+                    className="metric-modal-close"
+                    type="button"
+                    onClick={() => setShowAccessInfo(false)}
+                    aria-label="Close"
+                  >
+                    <X size={18} strokeWidth={3} />
+                  </button>
+                  <h3>Access code</h3>
+                  <p>
+                    Optional — enter the code your facilitator shared so your results can be grouped with your class
+                    or event.
+                  </p>
+                </div>
+              </div>
+            ) : null}
           </section>
         ) : null}
 
