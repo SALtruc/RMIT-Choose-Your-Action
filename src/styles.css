@@ -118,11 +118,17 @@ summary:focus-visible {
   filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.92));
 }
 
+.phone-stage > .start-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
 .start-screen {
   position: relative;
-  min-height: calc(100svh - 46px);
   overflow: hidden;
-  padding-top: clamp(10px, 5svh, 42px);
 }
 
 .start-screen .pixel-mark {
@@ -153,14 +159,13 @@ summary:focus-visible {
 }
 
 .start-character {
-  position: absolute;
+  position: relative;
   z-index: 1;
   display: block;
-  left: 0;
-  bottom: 0;
-  width: min(82vw, 375px);
+  margin: clamp(-56px, -9svh, -24px) auto 0 0;
+  width: min(82vw, 320px);
   max-width: none;
-  max-height: 44svh;
+  max-height: 38svh;
   pointer-events: none;
 }
 
