@@ -282,6 +282,7 @@ export default function App() {
   const [avatarId, setAvatarId] = useState<string | null>(null);
   const [studentId, setStudentId] = useState("");
   const [profile, setProfile] = useState({ year: "", program: "", accessCode: "" });
+  const [showAccessInfo, setShowAccessInfo] = useState(false);
   const [scenarioIndex, setScenarioIndex] = useState(0);
   const [selectedChoiceId, setSelectedChoiceId] = useState<string | null>(null);
   const [choiceHistory, setChoiceHistory] = useState<string[]>([]);
@@ -684,8 +685,25 @@ export default function App() {
               <label>
                 <span className="ribbon red flag access-ribbon">
                   Access code <em>(Optional)</em>
-                  <Info size={24} />
+                  <button
+                    type="button"
+                    className="info-toggle"
+                    aria-label="What is an access code?"
+                    aria-expanded={showAccessInfo}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      setShowAccessInfo((value) => !value);
+                    }}
+                  >
+                    <Info size={22} />
+                  </button>
                 </span>
+                {showAccessInfo ? (
+                  <p className="access-info-tip">
+                    Optional — enter the code your facilitator shared so your results can be grouped with your class
+                    or event.
+                  </p>
+                ) : null}
                 <input
                   value={profile.accessCode}
                   onChange={(event) => setProfile((item) => ({ ...item, accessCode: event.target.value }))}
@@ -790,6 +808,7 @@ export default function App() {
                     selectedChoiceId === choice.id ? `choice selected ${outcomeClass[choice.outcome]}` : "choice"
                   }
                   onClick={() => handleChoice(choice)}
+                  disabled={selectedChoiceId !== null && selectedChoiceId !== choice.id}
                 >
                   {choice.label}
                 </button>
@@ -805,16 +824,14 @@ export default function App() {
                   </div>
                   <p>{selectedChoice.feedback.replace(`${outcomeLabel[selectedChoice.outcome]}. `, "")}</p>
                   <span className="feedback-points">Accuracy: +{selectedChoice.score} pts</span>
-                  {selectedChoice.outcome !== "good" ? (
-                    <button
-                      className="feedback-reveal"
-                      type="button"
-                      onClick={() => setRevealSuggested((value) => !value)}
-                    >
-                      {revealSuggested ? "Hide the suggested response" : "Tap to see the suggested response"}
-                    </button>
-                  ) : null}
-                  {revealSuggested && selectedChoice.outcome !== "good" ? (
+                  <button
+                    className="feedback-reveal"
+                    type="button"
+                    onClick={() => setRevealSuggested((value) => !value)}
+                  >
+                    {revealSuggested ? "Hide the suggested response" : "Tap to see the suggested response"}
+                  </button>
+                  {revealSuggested ? (
                     <div className="feedback-suggested">
                       <p className="feedback-suggested-context">Say to: {scenario.suggestedResponse.sayTo}</p>
                       <p className="feedback-suggested-quote">&ldquo;{scenario.suggestedResponse.message}&rdquo;</p>
