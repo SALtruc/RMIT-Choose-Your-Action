@@ -690,7 +690,7 @@ export default function App() {
                   required
                 />
               </label>
-              <label>
+              <label className="access-code-label">
                 <span className="ribbon red flag access-ribbon">
                   Access code <em>(Optional)</em>
                   <button
@@ -707,7 +707,7 @@ export default function App() {
                   </button>
                 </span>
                 {showAccessInfo ? (
-                  <p className="access-info-tip">
+                  <p className="access-info-tip" role="tooltip">
                     Optional — enter the code your facilitator shared so your results can be grouped with your class
                     or event.
                   </p>
