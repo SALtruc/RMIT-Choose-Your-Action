@@ -629,10 +629,14 @@ export default function App() {
               <h2>RMIT Students</h2>
               <label>
                 <input
-                  value={studentId}
-                  onChange={(event) => setStudentId(event.target.value)}
+                  value={studentId ? `S${studentId}` : ""}
+                  onChange={(event) => {
+                    const digits = event.target.value.replace(/\D/g, "").slice(0, 7);
+                    setStudentId(digits);
+                  }}
                   placeholder="Enter your Student ID"
                   aria-label="Student ID"
+                  inputMode="numeric"
                   required
                 />
               </label>
@@ -680,7 +684,7 @@ export default function App() {
               <label>
                 <span className="ribbon red flag access-ribbon">
                   Access code <em>(Optional)</em>
-                  <Info size={18} />
+                  <Info size={24} />
                 </span>
                 <input
                   value={profile.accessCode}
@@ -801,14 +805,16 @@ export default function App() {
                   </div>
                   <p>{selectedChoice.feedback.replace(`${outcomeLabel[selectedChoice.outcome]}. `, "")}</p>
                   <span className="feedback-points">Accuracy: +{selectedChoice.score} pts</span>
-                  <button
-                    className="feedback-reveal"
-                    type="button"
-                    onClick={() => setRevealSuggested((value) => !value)}
-                  >
-                    {revealSuggested ? "Hide the suggested response" : "Tap to see the suggested response"}
-                  </button>
-                  {revealSuggested ? (
+                  {selectedChoice.outcome !== "good" ? (
+                    <button
+                      className="feedback-reveal"
+                      type="button"
+                      onClick={() => setRevealSuggested((value) => !value)}
+                    >
+                      {revealSuggested ? "Hide the suggested response" : "Tap to see the suggested response"}
+                    </button>
+                  ) : null}
+                  {revealSuggested && selectedChoice.outcome !== "good" ? (
                     <div className="feedback-suggested">
                       <p className="feedback-suggested-context">Say to: {scenario.suggestedResponse.sayTo}</p>
                       <p className="feedback-suggested-quote">&ldquo;{scenario.suggestedResponse.message}&rdquo;</p>
@@ -859,10 +865,10 @@ export default function App() {
             <p className="speech result-speech">Would you like to challenge again?</p>
             <img className="result-character" src="/assets/result-character.png" alt="" />
             <div className="result-actions">
-              <StickerButton tone="red" onClick={restart} icon={<RotateCcw size={24} />}>
+              <StickerButton tone="red" onClick={restart} icon={<RotateCcw size={20} />}>
                 Of course, LET'S GO!
               </StickerButton>
-              <StickerButton tone="white" onClick={restart} icon={<ArrowRight size={24} />}>
+              <StickerButton tone="white" onClick={restart} icon={<ArrowRight size={20} />}>
                 No, let's go back to homepage
               </StickerButton>
             </div>
@@ -879,7 +885,7 @@ export default function App() {
         />
         <section className="side-card">
           <h2>Session</h2>
-          <p>{studentId ? `SID ${studentId}` : "Student ID not verified yet."}</p>
+          <p>{studentId ? `SID S${studentId}` : "Student ID not verified yet."}</p>
           <p>
             Scenario {Math.min(scenarioIndex + 1, scenarios.length)} / {scenarios.length}
           </p>
