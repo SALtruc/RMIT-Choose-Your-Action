@@ -665,59 +665,61 @@ export default function App() {
 
         {screen === "profile" ? (
           <section className="profile-screen">
-            <img className="asset-logo profile-logo" src="/assets/choose-logo.png" alt="Choose Your Action" />
-            <img className="collect-guide" src="/assets/collect-guide.png" alt="" />
-            <form
-              className="profile-form"
-              onSubmit={(event) => {
-                event.preventDefault();
-                openHowto("profile");
-              }}
-            >
-              <label>
-                <span className="ribbon red flag">What year of study are you in?</span>
-                <input
-                  value={profile.year}
-                  onChange={(event) => setProfile((item) => ({ ...item, year: event.target.value }))}
-                  placeholder="e.g. Year 3"
-                  required
-                />
-              </label>
-              <label>
-                <span className="ribbon red flag">What is your current program?</span>
-                <input
-                  value={profile.program}
-                  onChange={(event) => setProfile((item) => ({ ...item, program: event.target.value }))}
-                  placeholder="e.g. Digital Marketing"
-                  required
-                />
-              </label>
-              <label>
-                <span className="ribbon red flag access-ribbon">
-                  Access code <em>(Optional)</em>
-                  <button
-                    type="button"
-                    className="info-toggle"
-                    aria-label="What is an access code?"
-                    aria-expanded={showAccessInfo}
-                    onClick={(event) => {
-                      event.preventDefault();
-                      setShowAccessInfo(true);
-                    }}
-                  >
-                    <Info size={22} />
-                  </button>
-                </span>
-                <input
-                  value={profile.accessCode}
-                  onChange={(event) => setProfile((item) => ({ ...item, accessCode: event.target.value }))}
-                  placeholder="e.g. CXVED"
-                />
-              </label>
-              <StickerButton tone="yellow" buttonType="submit">
-                Next
-              </StickerButton>
-            </form>
+            <div className="profile-scroll">
+              <img className="asset-logo profile-logo" src="/assets/choose-logo.png" alt="Choose Your Action" />
+              <img className="collect-guide" src="/assets/collect-guide.png" alt="" />
+              <form
+                className="profile-form"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  openHowto("profile");
+                }}
+              >
+                <label>
+                  <span className="ribbon red flag">What year of study are you in?</span>
+                  <input
+                    value={profile.year}
+                    onChange={(event) => setProfile((item) => ({ ...item, year: event.target.value }))}
+                    placeholder="e.g. Year 3"
+                    required
+                  />
+                </label>
+                <label>
+                  <span className="ribbon red flag">What is your current program?</span>
+                  <input
+                    value={profile.program}
+                    onChange={(event) => setProfile((item) => ({ ...item, program: event.target.value }))}
+                    placeholder="e.g. Digital Marketing"
+                    required
+                  />
+                </label>
+                <label>
+                  <span className="ribbon red flag access-ribbon">
+                    Access code <em>(Optional)</em>
+                    <button
+                      type="button"
+                      className="info-toggle"
+                      aria-label="What is an access code?"
+                      aria-expanded={showAccessInfo}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        setShowAccessInfo(true);
+                      }}
+                    >
+                      <Info size={22} />
+                    </button>
+                  </span>
+                  <input
+                    value={profile.accessCode}
+                    onChange={(event) => setProfile((item) => ({ ...item, accessCode: event.target.value }))}
+                    placeholder="e.g. CXVED"
+                  />
+                </label>
+                <StickerButton tone="yellow" buttonType="submit">
+                  Next
+                </StickerButton>
+              </form>
+            </div>
             {showAccessInfo ? (
               <div
                 className="metric-modal-backdrop"

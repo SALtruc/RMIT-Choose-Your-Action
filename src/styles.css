@@ -143,9 +143,9 @@ summary:focus-visible {
   position: relative;
   z-index: 2;
   display: block;
-  width: 112%;
-  max-width: none;
-  margin: clamp(10px, 5svh, 40px) 0 0 -20px;
+  width: 102%;
+  max-width: 390px;
+  margin: clamp(10px, 5svh, 40px) 0 0 -4px;
   filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.9));
 }
 
@@ -162,10 +162,13 @@ summary:focus-visible {
   position: relative;
   z-index: 1;
   display: block;
-  margin: clamp(-56px, -9svh, -24px) auto 0 0;
-  width: min(82vw, 320px);
+  margin: clamp(6px, 1.2svh, 12px) auto 0 0;
+  width: min(76vw, 300px, 32.5svh);
+  height: auto;
   max-width: none;
-  max-height: 38svh;
+  max-height: none;
+  object-fit: contain;
+  object-position: left center;
   pointer-events: none;
 }
 
@@ -196,14 +199,14 @@ summary:focus-visible {
 }
 
 .game-header {
-  min-height: 112px;
+  min-height: clamp(90px, 13.4svh, 112px);
   flex-shrink: 0;
   display: grid;
   grid-template-columns: 1fr auto;
   grid-template-rows: auto auto;
   align-items: start;
-  row-gap: 16px;
-  padding-top: 8px;
+  row-gap: clamp(6px, 1.8svh, 16px);
+  padding-top: clamp(0px, 0.9svh, 8px);
 }
 
 .game-header.compact {
@@ -746,8 +749,7 @@ summary:focus-visible {
   z-index: 2;
 }
 
-.phone-stage > .verify-screen,
-.phone-stage > .profile-screen {
+.phone-stage > .verify-screen {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -755,6 +757,28 @@ summary:focus-visible {
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
+}
+
+.phone-stage > .profile-screen {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Scrollable middle region for the profile form. Deliberately NOT centered
+   with justify-content on this scrolling element: combining justify-content:
+   center with overflow:auto clips the start of the content and makes it
+   permanently unreachable (you can't scroll "past" the auto-collapsed
+   negative space) once the content is taller than the viewport. */
+.profile-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .verify-screen {
@@ -788,10 +812,13 @@ summary:focus-visible {
   gap: 22px;
   position: relative;
   z-index: 2;
+  padding-right: 12px;
+  padding-bottom: 18px;
 }
 
 .profile-form .sticker-button {
   justify-self: end;
+  margin-right: 2px;
 }
 
 .tab-strip {
@@ -830,8 +857,8 @@ summary:focus-visible {
 }
 
 .notebook-card {
-  margin-top: 30px;
-  padding: 22px 24px 18px;
+  margin-top: clamp(14px, 4svh, 30px);
+  padding: clamp(14px, 2.6svh, 22px) 24px clamp(12px, 2svh, 18px);
   background: #fff;
   border-radius: 0 0 20px 20px;
   box-shadow: 8px 10px 0 var(--shadow);
@@ -848,8 +875,8 @@ summary:focus-visible {
 .notebook-card h1 {
   text-align: center;
   color: var(--red);
-  font-size: clamp(2.1rem, 9vw, 2.9rem);
-  margin: 0 0 12px;
+  font-size: clamp(1.7rem, 7.4vw, 2.9rem);
+  margin: 0 0 clamp(6px, 1.4svh, 12px);
   font-weight: 900;
 }
 
@@ -859,30 +886,31 @@ summary:focus-visible {
 }
 
 .notebook-card li {
-  margin: 0 0 9px;
+  margin: 0 0 clamp(4px, 1svh, 9px);
   color: var(--navy);
-  font-size: clamp(1rem, 4.2vw, 1.35rem);
-  line-height: 1.42;
+  font-size: clamp(0.92rem, 3.7vw, 1.35rem);
+  line-height: 1.3;
   font-weight: 500;
 }
 
 .badges {
-  display: grid;
-  justify-items: end;
-  gap: 10px;
-  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px 6px;
+  margin-top: clamp(8px, 1.6svh, 14px);
 }
 
 .badges span {
-  min-width: 220px;
+  min-width: 0;
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 6px;
   border-radius: 999px;
   box-shadow: 6px 8px 0 var(--shadow);
-  padding: 10px 24px 10px 10px;
+  padding: 7px 12px 7px 7px;
   font-weight: 900;
-  font-size: 1.15rem;
+  font-size: clamp(0.78rem, 3.1vw, 1.15rem);
 }
 
 .badges span:first-child {
@@ -896,11 +924,12 @@ summary:focus-visible {
 .badge-icon {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: 28px;
+  height: 28px;
   border-radius: 999px;
   background: #fff;
   color: var(--navy);
+  flex: none;
 }
 
 .howto-footer {
@@ -915,6 +944,7 @@ summary:focus-visible {
 .howto-character {
   flex: none;
   width: min(44vw, 200px);
+  height: auto;
   margin: 0 0 0 clamp(-12px, -3vw, -4px);
   pointer-events: none;
 }
@@ -1635,6 +1665,145 @@ summary:focus-visible {
     grid-template-columns: 1fr;
     justify-items: center;
     text-align: center;
+  }
+}
+
+@media (max-height: 720px) {
+  .phone-stage {
+    padding-top: max(10px, env(safe-area-inset-top));
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+  }
+
+  .start-character {
+    margin-top: 6px;
+    width: min(70vw, 260px, 27svh);
+  }
+
+  .game-header {
+    min-height: 86px;
+    row-gap: 4px;
+    padding-top: 0;
+  }
+
+  .game-header .pixel-mark {
+    transform: scale(0.64);
+  }
+
+  .header-avatar {
+    width: 52px;
+    height: 52px;
+  }
+
+  .back-button {
+    font-size: 1.08rem;
+  }
+
+  .profile-logo {
+    display: none;
+  }
+
+  .collect-guide {
+    width: min(94%, 410px);
+    margin: 0 0 12px;
+  }
+
+  .profile-form {
+    gap: 14px;
+    padding-right: 14px;
+    padding-bottom: 20px;
+  }
+
+  .ribbon.red {
+    padding: 12px 16px;
+    font-size: clamp(0.9rem, 3.4vw, 1.05rem);
+  }
+
+  .ribbon.red.flag {
+    width: calc(100% - 42px);
+  }
+
+  .profile-form input {
+    min-height: 48px;
+    padding-inline: 20px;
+  }
+
+  .phone-stage > .howto-screen {
+    overflow: visible;
+  }
+
+  .howto-scroll {
+    overflow: visible;
+    padding-bottom: 0;
+  }
+
+  .notebook-card {
+    margin-top: 26px;
+    padding: 10px 18px 12px;
+    border-radius: 0 0 16px 16px;
+  }
+
+  .notebook-card .tab-strip {
+    top: -27px;
+    height: 24px;
+  }
+
+  .notebook-card .scene-badge {
+    top: -42px;
+    width: 40px;
+  }
+
+  .notebook-card h1 {
+    font-size: clamp(1.45rem, 6vw, 2.1rem);
+    margin-bottom: 6px;
+  }
+
+  .notebook-card ul {
+    padding-left: 22px;
+  }
+
+  .notebook-card li {
+    margin-bottom: 4px;
+    font-size: clamp(0.82rem, 3.15vw, 1rem);
+    line-height: 1.2;
+  }
+
+  .badges {
+    gap: 4px;
+    margin-top: 7px;
+  }
+
+  .badges span {
+    gap: 5px;
+    padding: 5px 9px 5px 5px;
+    box-shadow: 4px 6px 0 var(--shadow);
+    font-size: clamp(0.7rem, 2.75vw, 0.9rem);
+  }
+
+  .badge-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .badge-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .howto-footer {
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .howto-character {
+    width: min(38vw, 158px, 23.8svh);
+  }
+
+  .howto-screen .sticker-button {
+    min-width: 138px;
+    min-height: 50px;
+    gap: 10px;
+    padding: 10px 18px;
+    font-size: clamp(0.95rem, 3.5vw, 1.12rem);
   }
 }
 
