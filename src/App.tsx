@@ -217,7 +217,7 @@ export default function App() {
       );
 
       gsap.to(
-        activeSection.querySelectorAll(".start-bubble, .start-character, .verify-character, .howto-character, .result-character"),
+        activeSection.querySelectorAll(".start-character, .verify-character, .howto-character, .result-character"),
         {
           y: "-=8",
           duration: 1.8,

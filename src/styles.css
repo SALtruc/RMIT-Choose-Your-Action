@@ -150,7 +150,7 @@ summary:focus-visible {
   z-index: 2;
   display: block;
   width: 92%;
-  margin: clamp(8px, 2.5svh, 20px) 0 0 auto;
+  margin: clamp(18px, 4.5svh, 40px) 0 0 auto;
   filter: drop-shadow(8px 10px 0 #000);
 }
 
@@ -1617,6 +1617,10 @@ summary:focus-visible {
   .phone-stage {
     padding-top: max(10px, env(safe-area-inset-top));
     padding-bottom: max(20px, env(safe-area-inset-bottom));
+  }
+
+  .start-bubble {
+    margin-top: 14px;
   }
 
   .start-character {
