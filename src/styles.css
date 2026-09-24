@@ -785,6 +785,10 @@ summary:focus-visible {
   padding-bottom: 12px;
 }
 
+.profile-desk-guide {
+  display: none;
+}
+
 .collect-guide {
   display: block;
   width: min(100%, 460px);
@@ -1085,7 +1089,7 @@ summary:focus-visible {
 
 .choices {
   display: grid;
-  gap: 18px;
+  gap: 24px;
   padding-bottom: 18px;
 }
 
@@ -1129,10 +1133,11 @@ summary:focus-visible {
   position: relative;
 }
 
-/* Score sticker slapped on the corner of the picked answer */
+/* Score sticker slapped on the corner of the picked answer, sitting mostly
+   above the top border so it doesn't cover the answer text. */
 .score-pop {
   position: absolute;
-  top: -16px;
+  top: -26px;
   right: -8px;
   border: 3px solid var(--ink);
   border-radius: 999px;
@@ -1943,10 +1948,31 @@ summary:focus-visible {
   }
 
   .collect-guide {
+    display: none;
+  }
+
+  .profile-desk-guide {
     grid-area: guide;
     align-self: start;
-    width: min(100%, 480px);
-    margin: 0 auto;
+    display: grid;
+    justify-items: center;
+    width: min(100%, 460px);
+    margin: 8px auto 0;
+  }
+
+  .profile-desk-guide .speech {
+    justify-self: end;
+    max-width: none;
+    margin: 0 0 -6px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .profile-desk-guide img {
+    display: block;
+    width: min(100%, 320px, 40svh);
+    height: auto;
+    pointer-events: none;
   }
 
   .profile-form {

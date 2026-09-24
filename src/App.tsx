@@ -502,6 +502,12 @@ export default function App() {
             <div className="profile-scroll">
               <img className="asset-logo profile-logo" src="/assets/choose-logo.png" alt="Choose Your Action" />
               <img className="collect-guide" src="/assets/collect-guide.png" alt="" />
+              {/* Desktop-only: the cropped collect-guide art looks cut off when it
+                  floats in a column, so show the full character with a bubble. */}
+              <div className="profile-desk-guide" aria-hidden="true">
+                <p className="speech">Tell us more about yourself</p>
+                <img src="/assets/start-character.png" alt="" />
+              </div>
               <form
                 className="profile-form"
                 onSubmit={(event) => {
