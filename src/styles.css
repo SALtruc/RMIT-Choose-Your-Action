@@ -743,6 +743,9 @@ summary:focus-visible {
 .verify-card {
   position: relative;
   z-index: 2;
+  /* Its explicit min-height would otherwise let flex shrink it below its
+     content on short screens, pushing the Next button out of the card. */
+  flex-shrink: 0;
 }
 
 .phone-stage > .verify-screen {
@@ -836,24 +839,24 @@ summary:focus-visible {
   filter: drop-shadow(3px 4px 0 var(--shadow));
 }
 
+/* The card grows to its full height and the stage scrolls if it must, rather
+   than scrolling inside a clipped box that cut off the card's top/bottom. */
 .phone-stage > .howto-screen {
   display: flex;
   flex-direction: column;
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: hidden;
+  flex: 1 0 auto;
 }
 
+/* padding-top makes room for the tab strip (-31px) and scene badge (-46px)
+   that hang above the card. */
 .howto-scroll {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
+  flex: 1 0 auto;
+  padding-top: 50px;
   padding-bottom: 6px;
 }
 
 .notebook-card {
-  margin-top: clamp(14px, 4svh, 30px);
+  margin-top: 0;
   padding: clamp(14px, 2.6svh, 22px) 24px clamp(12px, 2svh, 18px);
   background: #fff;
   border-radius: 0 0 20px 20px;
@@ -1164,7 +1167,10 @@ summary:focus-visible {
 /* Brief red wash over the game screen when a risky choice is picked */
 .risk-flash {
   position: absolute;
-  inset: -40px -22px;
+  inset: -40px 0;
+  /* Spread past the stage padding with a shadow, which (unlike a negative
+     inset) doesn't widen the scroll area. */
+  box-shadow: 0 0 0 22px var(--red);
   background: var(--red);
   opacity: 0;
   visibility: hidden;
@@ -1667,6 +1673,7 @@ summary:focus-visible {
 
   .howto-scroll {
     overflow: visible;
+    padding-top: 0;
     padding-bottom: 0;
   }
 
@@ -1741,23 +1748,379 @@ summary:focus-visible {
   }
 }
 
+/* ---------- Desktop: full-screen, two-column layouts ----------
+   The stage fills the window and scrolls as one page; each screen spreads its
+   mobile stack across two columns inside a centred content width. */
 @media (min-width: 900px) {
   .app-shell {
-    grid-template-columns: minmax(420px, 520px);
-    justify-content: center;
-    align-items: start;
-    padding: 36px;
+    display: block;
   }
 
   .phone-stage {
-    min-height: calc(100svh - 72px);
-    max-height: calc(100svh - 72px);
-    border: 4px solid var(--ink);
-    border-radius: 34px;
-    box-shadow: 16px 20px 0 var(--shadow);
-    /* Bottom padding must clear the border-radius so flush-bottom content
-       (e.g. the last button on a scrollable screen) isn't clipped by the
-       rounded corner even when scrolled all the way down. */
-    padding-bottom: max(46px, env(safe-area-inset-bottom));
+    width: 100%;
+    height: 100svh;
+    padding: 24px clamp(32px, 5vw, 80px) 48px;
+    background-size: 96px 96px;
+  }
+
+  .phone-stage > * {
+    width: 100%;
+    max-width: 1180px;
+    margin-inline: auto;
+  }
+
+  /* Screens grow with their content instead of scrolling internally, so there
+     are no nested scrollbars; the page itself scrolls when needed. Extra
+     .app-shell keeps this above the per-screen ".phone-stage > .x" rules. */
+  .app-shell .phone-stage > section {
+    flex: 1 0 auto;
+    min-height: auto;
+    overflow: visible;
+  }
+
+  .avatar-scroll,
+  .profile-scroll,
+  .howto-scroll {
+    flex: none;
+    overflow: visible;
+  }
+
+  .game-header {
+    min-height: 0;
+    margin-bottom: 8px;
+  }
+
+  /* Start */
+  .phone-stage > .start-screen {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "logo   char"
+      "bubble char"
+      "button char";
+    align-content: center;
+    column-gap: 64px;
+  }
+
+  .start-screen .pixel-mark {
+    top: 0;
+    left: 0;
+  }
+
+  .start-logo,
+  .start-bubble {
+    width: min(100%, 540px);
+    max-width: none;
+    justify-self: center;
+    margin: 0;
+  }
+
+  .start-logo {
+    grid-area: logo;
+  }
+
+  .start-bubble {
+    grid-area: bubble;
+    margin-top: 32px;
+  }
+
+  .image-start-button {
+    grid-area: button;
+    width: 230px;
+    margin: 44px auto 0;
+  }
+
+  .start-character {
+    grid-area: char;
+    align-self: center;
+    justify-self: center;
+    width: min(100%, 480px, 68svh);
+    margin: 0;
+  }
+
+  /* Avatar */
+  .phone-stage > .avatar-screen {
+    justify-content: center;
+    padding-top: 0;
+  }
+
+  .avatar-screen .setup-mark {
+    top: 0;
+    left: 0;
+  }
+
+  .avatar-screen h1 {
+    max-width: none;
+    margin: 0 0 40px;
+    text-align: center;
+    font-size: 2.9rem;
+  }
+
+  .avatar-screen h1 span {
+    display: inline;
+  }
+
+  .avatar-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    max-width: 780px;
+    margin: 0 auto 24px;
+    gap: 32px;
+  }
+
+  .avatar-option {
+    max-width: 156px;
+  }
+
+  /* Verify */
+  .phone-stage > .verify-screen {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    grid-template-areas:
+      "char logo"
+      "char card"
+      "char note";
+    align-content: center;
+    column-gap: 64px;
+  }
+
+  .verify-footer {
+    display: contents;
+  }
+
+  .verify-logo {
+    grid-area: logo;
+    width: min(100%, 500px, 58svh);
+    justify-self: center;
+    margin-bottom: 20px;
+  }
+
+  .verify-card {
+    grid-area: card;
+    width: min(100%, 560px);
+    justify-self: center;
+    min-height: auto;
+    padding: 44px 48px 36px;
+  }
+
+  .verify-character {
+    grid-area: char;
+    align-self: center;
+    justify-self: center;
+    width: min(100%, 400px, 60svh);
+    margin: 0;
+  }
+
+  .verify-note {
+    grid-area: note;
+    justify-self: center;
+    flex: none;
+    margin-top: 24px;
+    padding: 14px 28px;
+    font-size: 1.1rem;
+  }
+
+  /* Profile */
+  .phone-stage > .profile-screen {
+    justify-content: center;
+  }
+
+  .profile-scroll {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "logo  form"
+      "guide form";
+    align-items: center;
+    column-gap: 64px;
+  }
+
+  .profile-logo {
+    grid-area: logo;
+    display: block;
+    align-self: end;
+    width: min(100%, 440px);
+    margin: 0 auto 8px;
+  }
+
+  .collect-guide {
+    grid-area: guide;
+    align-self: start;
+    width: min(100%, 480px);
+    margin: 0 auto;
+  }
+
+  .profile-form {
+    grid-area: form;
+    gap: 26px;
+  }
+
+  /* How to play */
+  .phone-stage > .howto-screen {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    grid-template-areas:
+      "char card"
+      "char button";
+    align-content: center;
+    column-gap: 64px;
+  }
+
+  .howto-footer {
+    display: contents;
+  }
+
+  .howto-scroll {
+    grid-area: card;
+    padding: 50px 0 0;
+  }
+
+  .notebook-card {
+    margin-top: 0;
+    padding: 30px 40px 28px;
+    border-radius: 0 0 20px 20px;
+  }
+
+  .notebook-card .tab-strip {
+    top: -31px;
+    height: 28px;
+  }
+
+  .notebook-card .scene-badge {
+    top: -46px;
+    width: 46px;
+  }
+
+  .notebook-card h1 {
+    font-size: 3rem;
+    margin-bottom: 16px;
+  }
+
+  .notebook-card li {
+    margin-bottom: 12px;
+    font-size: 1.25rem;
+    line-height: 1.45;
+  }
+
+  .badges {
+    gap: 10px;
+    margin-top: 18px;
+  }
+
+  .badges span {
+    padding: 7px 14px 7px 7px;
+    font-size: 1.05rem;
+  }
+
+  .howto-character {
+    grid-area: char;
+    align-self: center;
+    justify-self: center;
+    width: min(100%, 380px, 58svh);
+    margin: 0;
+  }
+
+  .howto-screen .sticker-button {
+    grid-area: button;
+    justify-self: end;
+    margin: 32px 0 0;
+    min-width: 170px;
+    min-height: 58px;
+    font-size: 1.3rem;
+  }
+
+  /* Game: scenario pinned on the left, choices and feedback on the right */
+  .phone-stage > .game-screen {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto auto 1fr;
+    grid-template-areas:
+      "progress progress"
+      "card     title"
+      "card     choices"
+      "card     feedback";
+    align-items: start;
+    column-gap: 56px;
+  }
+
+  .progress-line {
+    grid-area: progress;
+    margin-bottom: 64px;
+  }
+
+  .scenario-card {
+    grid-area: card;
+    position: sticky;
+    top: 60px;
+    margin-bottom: 0;
+    padding: 36px 32px;
+  }
+
+  .question-title {
+    grid-area: title;
+    margin: 0 0 18px;
+  }
+
+  .choices {
+    grid-area: choices;
+  }
+
+  .feedback {
+    grid-area: feedback;
+  }
+
+  .risk-flash {
+    grid-column: 1 / -1;
+    grid-row: 1 / -1;
+    box-shadow: 0 0 0 80px var(--red);
+  }
+
+  /* Result */
+  .phone-stage > .result-screen {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    align-content: center;
+    align-items: start;
+    column-gap: 64px;
+  }
+
+  .result-logo {
+    grid-column: 1;
+    grid-row: 1;
+    width: min(100%, 440px);
+    margin: 0 0 24px;
+  }
+
+  .score-card {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .reflection {
+    grid-column: 1;
+    grid-row: 3;
+    margin-bottom: 0;
+  }
+
+  .result-speech {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: end;
+    max-width: none;
+    margin: 0 0 24px;
+  }
+
+  .result-character {
+    position: static;
+    grid-column: 2;
+    grid-row: 2 / span 2;
+    justify-self: start;
+    width: min(100%, 300px, 36svh);
+  }
+
+  .result-actions {
+    grid-column: 2;
+    grid-row: 4;
+    justify-items: start;
+    margin: 24px 0 0;
   }
 }
