@@ -8,29 +8,11 @@ import {
   Info,
   ListChecks,
   RotateCcw,
-  Share2,
   X,
 } from "lucide-react";
 import "./styles.css";
-import {
-  metricColors,
-  metricDescriptions,
-  metricLabels,
-  scenarios,
-  type Choice,
-  type MetricKey,
-  type Metrics,
-  type Outcome,
-} from "./data/scenarios";
-import { applyChoice, rankTitle, resetMetrics, scoreFromChoices } from "./lib/score";
-import {
-  createRoom,
-  isRealtimeConfigured,
-  loadRoom,
-  saveRoom,
-  subscribeToRoom,
-  type GameSnapshot,
-} from "./lib/roomService";
+import { scenarios, type Choice, type Outcome } from "./data/scenarios";
+import { rankTitle, scoreFromChoices } from "./lib/score";
 
 type Screen = "start" | "avatar" | "verify" | "profile" | "howto" | "game" | "result";
 
@@ -71,21 +53,6 @@ const reflectionQuestions = [
     detail: "Could any of these situations have been avoided with clearer conversations earlier?",
   },
 ];
-
-function buildSnapshot(state: {
-  screen: Screen;
-  avatarId: string | null;
-  studentId: string;
-  profile: { year: string; program: string; accessCode: string };
-  scenarioIndex: number;
-  selectedChoiceId: string | null;
-  choices: string[];
-}): GameSnapshot {
-  return {
-    ...state,
-    updatedAt: new Date().toISOString(),
-  };
-}
 
 function LogoBadge({
   onClick,
@@ -183,99 +150,6 @@ function StickerButton({
   );
 }
 
-function MetricCard({
-  metric,
-  value,
-  onOpen,
-}: {
-  metric: MetricKey;
-  value: number;
-  onOpen: () => void;
-}) {
-  return (
-    <div className="metric-card">
-      <button
-        className="metric-card-head"
-        type="button"
-        onClick={onOpen}
-        aria-haspopup="dialog"
-      >
-        {metricLabels[metric]}
-        <i className="info-dot" aria-hidden="true">
-          i
-        </i>
-      </button>
-      <span className="meter">
-        <i style={{ width: `${value}%`, background: metricColors[metric] }} />
-      </span>
-    </div>
-  );
-}
-
-function MetricModal({ metric, onClose }: { metric: MetricKey; onClose: () => void }) {
-  return (
-    <div className="metric-modal-backdrop" role="presentation" onClick={onClose}>
-      <div
-        className="metric-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-label={metricLabels[metric]}
-        onClick={(event) => event.stopPropagation()}
-      >
-        <button className="metric-modal-close" type="button" onClick={onClose} aria-label="Close">
-          <X size={18} strokeWidth={3} />
-        </button>
-        <i className="metric-modal-dot" style={{ background: metricColors[metric] }} aria-hidden="true" />
-        <h3>{metricLabels[metric]}</h3>
-        <p>{metricDescriptions[metric]}</p>
-      </div>
-    </div>
-  );
-}
-
-function RoomControls({
-  roomCode,
-  roomMessage,
-  onCreateRoom,
-  onJoinRoom,
-}: {
-  roomCode: string | null;
-  roomMessage: string;
-  onCreateRoom: () => void;
-  onJoinRoom: (code: string) => void;
-}) {
-  const [joinCode, setJoinCode] = useState("");
-
-  return (
-    <section className="room-panel" aria-label="Room controls">
-      <div>
-        <h2>Room</h2>
-        <p>{isRealtimeConfigured ? "Supabase realtime is ready." : "Local room preview. Add Supabase env to sync."}</p>
-      </div>
-      <div className="room-actions">
-        <button type="button" onClick={onCreateRoom}>
-          <Share2 size={18} />
-          Create room
-        </button>
-        <label>
-          <span>Join code</span>
-          <input
-            value={joinCode}
-            onChange={(event) => setJoinCode(event.target.value.toUpperCase())}
-            maxLength={6}
-            placeholder="CXVED"
-          />
-        </label>
-        <button type="button" onClick={() => onJoinRoom(joinCode)} disabled={!joinCode.trim()}>
-          Join
-        </button>
-      </div>
-      {roomCode ? <strong>Code: {roomCode}</strong> : null}
-      {roomMessage ? <p className="room-message">{roomMessage}</p> : null}
-    </section>
-  );
-}
-
 export default function App() {
   const stageRef = useRef<HTMLElement | null>(null);
   const feedbackRef = useRef<HTMLElement | null>(null);
@@ -287,11 +161,7 @@ export default function App() {
   const [scenarioIndex, setScenarioIndex] = useState(0);
   const [selectedChoiceId, setSelectedChoiceId] = useState<string | null>(null);
   const [choiceHistory, setChoiceHistory] = useState<string[]>([]);
-  const [metrics, setMetrics] = useState<Metrics>(resetMetrics);
-  const [roomCode, setRoomCode] = useState<string | null>(null);
-  const [roomMessage, setRoomMessage] = useState("");
   const [howtoReturnScreen, setHowtoReturnScreen] = useState<Screen | null>(null);
-  const [openMetric, setOpenMetric] = useState<MetricKey | null>(null);
   const [revealSuggested, setRevealSuggested] = useState(false);
   const [reflectionOpen, setReflectionOpen] = useState(false);
 
@@ -327,7 +197,7 @@ export default function App() {
       );
 
       gsap.fromTo(
-        activeSection.querySelectorAll(".avatar-option, .choice, .metric-card, .badges span"),
+        activeSection.querySelectorAll(".avatar-option, .choice, .badges span"),
         { autoAlpha: 0, y: 18, scale: 0.96 },
         {
           autoAlpha: 1,
@@ -368,7 +238,7 @@ export default function App() {
 
     const ctx = gsap.context(() => {
       gsap.fromTo(
-        ".progress-line span, .meter i",
+        ".progress-line span",
         { scaleX: 0.4, transformOrigin: "left center" },
         { scaleX: 1, duration: 0.72, ease: "power3.out", stagger: 0.04 },
       );
@@ -397,6 +267,41 @@ export default function App() {
 
     return () => ctx.revert();
   }, [screen, scenarioIndex, selectedChoiceId, revealSuggested]);
+
+  // Score reaction runs only when a choice is picked, so it doesn't replay when
+  // the suggested response is toggled. Risky choices get a heavier "penalty" feel.
+  useLayoutEffect(() => {
+    const stage = stageRef.current;
+    const outcome = selectedChoice?.outcome;
+    if (!stage || !outcome) return undefined;
+
+    if (outcome === "risky") navigator.vibrate?.([60, 40, 90]);
+    if (shouldReduceMotion()) return undefined;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        ".score-pop",
+        { autoAlpha: 0, scale: 0.2, rotate: -24 },
+        { autoAlpha: 1, scale: 1, rotate: 6, duration: 0.55, ease: "back.out(2.4)", delay: 0.12 },
+      );
+
+      if (outcome === "risky") {
+        gsap.to(".choice.selected", {
+          keyframes: { x: [0, -12, 11, -9, 7, -4, 0] },
+          duration: 0.5,
+          ease: "none",
+        });
+        gsap.fromTo(".risk-flash", { autoAlpha: 0.42 }, { autoAlpha: 0, duration: 0.7, ease: "power2.out" });
+        gsap.fromTo(
+          ".feedback-points.risky",
+          { scale: 1.25, rotate: -4 },
+          { scale: 1, rotate: 0, duration: 0.6, ease: "elastic.out(1, 0.4)", delay: 0.25 },
+        );
+      }
+    }, stage);
+
+    return () => ctx.revert();
+  }, [selectedChoiceId, scenarioIndex]);
 
   useLayoutEffect(() => {
     const stage = stageRef.current;
@@ -427,42 +332,6 @@ export default function App() {
     if (!selectedChoiceId) return;
     feedbackRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [selectedChoiceId, revealSuggested]);
-
-  const snapshot = buildSnapshot({
-    screen,
-    avatarId,
-    studentId,
-    profile,
-    scenarioIndex,
-    selectedChoiceId,
-    choices: choiceHistory,
-  });
-
-  useEffect(() => {
-    if (!roomCode || !isRealtimeConfigured) return;
-    void saveRoom(roomCode, snapshot).catch(() => setRoomMessage("Room sync failed. Check Supabase rules."));
-  }, [roomCode, screen, avatarId, studentId, profile, scenarioIndex, selectedChoiceId, choiceHistory]);
-
-  useEffect(() => {
-    if (!roomCode) return undefined;
-    return subscribeToRoom(roomCode, (next) => {
-      setScreen(next.screen as Screen);
-      setAvatarId(next.avatarId);
-      setStudentId(next.studentId);
-      setProfile(next.profile);
-      setScenarioIndex(next.scenarioIndex);
-      setSelectedChoiceId(next.selectedChoiceId);
-      setChoiceHistory(next.choices);
-    });
-  }, [roomCode]);
-
-  useEffect(() => {
-    let next = resetMetrics();
-    selectedChoices.forEach((choice) => {
-      next = applyChoice(next, choice);
-    });
-    setMetrics(next);
-  }, [selectedChoices]);
 
   const goBack = () => {
     if (screen === "game" && selectedChoiceId) {
@@ -519,42 +388,7 @@ export default function App() {
     setScenarioIndex(0);
     setSelectedChoiceId(null);
     setChoiceHistory([]);
-    setMetrics(resetMetrics());
     setHowtoReturnScreen(null);
-  };
-
-  const handleCreateRoom = async () => {
-    try {
-      const result = await createRoom(snapshot);
-      setRoomCode(result.code);
-      setRoomMessage(result.remote ? "Room created and synced." : "Room code created locally.");
-    } catch {
-      setRoomMessage("Could not create room. Check Supabase table/policies.");
-    }
-  };
-
-  const handleJoinRoom = async (code: string) => {
-    const normalized = code.trim().toUpperCase();
-    if (!normalized) return;
-    try {
-      const next = await loadRoom(normalized);
-      if (!next) {
-        setRoomCode(normalized);
-        setRoomMessage("Room not found remotely. Using local preview code.");
-        return;
-      }
-      setRoomCode(normalized);
-      setRoomMessage("Joined synced room.");
-      setScreen(next.screen as Screen);
-      setAvatarId(next.avatarId);
-      setStudentId(next.studentId);
-      setProfile(next.profile);
-      setScenarioIndex(next.scenarioIndex);
-      setSelectedChoiceId(next.selectedChoiceId);
-      setChoiceHistory(next.choices);
-    } catch {
-      setRoomMessage("Could not join room. Check Supabase configuration.");
-    }
   };
 
   const showTopHeader = screen !== "start" && screen !== "avatar";
@@ -766,9 +600,9 @@ export default function App() {
                 <img className="scene-badge" src="/assets/scene-badge.png" alt="" aria-hidden="true" />
                 <h1>How to play</h1>
                 <ul>
-                  <li>You will be placed inside a real workplace scenario that interns and entry-level employees commonly face.</li>
+                  <li>You'll step into a workplace situation that many interns and early-career professionals experience.</li>
                   <li>Read carefully and choose one of three responses.</li>
-                  <li>Learn from the consequences and reflect on your choices.</li>
+                  <li>Learn from the outcomes of your decisions and reflect on the choices you made.</li>
                 </ul>
                 <div className="badges">
                   <span>
@@ -820,19 +654,6 @@ export default function App() {
               </p>
               <h1>{scenario.body}</h1>
             </article>
-            <div className="metrics-grid">
-              {(Object.keys(metricLabels) as MetricKey[]).map((metric) => (
-                <MetricCard
-                  key={metric}
-                  metric={metric}
-                  value={selectedChoice ? metrics[metric] : scenario.startingMetrics[metric]}
-                  onOpen={() => setOpenMetric(metric)}
-                />
-              ))}
-            </div>
-            {openMetric ? (
-              <MetricModal metric={openMetric} onClose={() => setOpenMetric(null)} />
-            ) : null}
             <h2 className="question-title">What do you do?</h2>
             <div className="choices">
               {scenario.choices.map((choice) => (
@@ -846,19 +667,26 @@ export default function App() {
                   disabled={selectedChoiceId !== null && selectedChoiceId !== choice.id}
                 >
                   {choice.label}
+                  {selectedChoiceId === choice.id ? (
+                    <span className={`score-pop ${outcomeClass[choice.outcome]}`} aria-hidden="true">
+                      +{choice.score} pts
+                    </span>
+                  ) : null}
                 </button>
               ))}
             </div>
             {selectedChoice ? (
               <aside className="feedback" ref={feedbackRef}>
-                <h3 className="feedback-heading">Here's what this costs you</h3>
+                <h3 className="feedback-heading">Here's how you did</h3>
                 <div className="feedback-card">
                   <div className="feedback-head">
                     <i className={`feedback-dot ${outcomeClass[selectedChoice.outcome]}`} aria-hidden="true" />
                     <strong>{outcomeLabel[selectedChoice.outcome]}</strong>
                   </div>
                   <p>{selectedChoice.feedback.replace(`${outcomeLabel[selectedChoice.outcome]}. `, "")}</p>
-                  <span className="feedback-points">Accuracy: +{selectedChoice.score} pts</span>
+                  <span className={`feedback-points ${outcomeClass[selectedChoice.outcome]}`}>
+                    Accuracy: +{selectedChoice.score} pts
+                  </span>
                   <button
                     className="feedback-reveal"
                     type="button"
@@ -878,6 +706,7 @@ export default function App() {
                 </StickerButton>
               </aside>
             ) : null}
+            {selectedChoice?.outcome === "risky" ? <div className="risk-flash" aria-hidden="true" /> : null}
           </section>
         ) : null}
 
@@ -927,22 +756,6 @@ export default function App() {
           </section>
         ) : null}
       </section>
-
-      <aside className="desktop-side">
-        <RoomControls
-          roomCode={roomCode}
-          roomMessage={roomMessage}
-          onCreateRoom={handleCreateRoom}
-          onJoinRoom={handleJoinRoom}
-        />
-        <section className="side-card">
-          <h2>Session</h2>
-          <p>{studentId ? `SID S${studentId}` : "Student ID not verified yet."}</p>
-          <p>
-            Scenario {Math.min(scenarioIndex + 1, scenarios.length)} / {scenarios.length}
-          </p>
-        </section>
-      </aside>
     </main>
   );
 }

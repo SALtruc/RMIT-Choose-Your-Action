@@ -79,10 +79,6 @@ summary:focus-visible {
   width: 100%;
 }
 
-.desktop-side {
-  display: none;
-}
-
 .pixel-mark {
   flex: none;
   width: 76px;
@@ -1011,66 +1007,6 @@ summary:focus-visible {
   line-height: 1.36;
 }
 
-.metrics-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
-}
-
-.metric-card {
-  position: relative;
-  min-width: 0;
-  min-height: 82px;
-  background: #fff;
-  border-radius: 20px;
-  box-shadow: 6px 8px 0 var(--shadow);
-  padding: 14px 16px;
-  text-align: left;
-}
-
-.metric-card-head {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  border: 0;
-  background: transparent;
-  padding: 0;
-  margin-bottom: 12px;
-  font-weight: 800;
-  font-size: 0.98rem;
-  color: var(--ink);
-  text-align: left;
-}
-
-.info-dot {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--ink);
-  border-radius: 999px;
-  font-size: 0.7rem;
-  font-style: italic;
-  font-weight: 900;
-}
-
-.meter {
-  display: block;
-  height: 9px;
-  border-radius: 999px;
-  background: #e2e2e2;
-  overflow: hidden;
-}
-
-.meter i {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-}
-
 .metric-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -1186,6 +1122,56 @@ summary:focus-visible {
   color: #fff;
 }
 
+.choice.selected {
+  position: relative;
+}
+
+/* Score sticker slapped on the corner of the picked answer */
+.score-pop {
+  position: absolute;
+  top: -16px;
+  right: -8px;
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  box-shadow: 3px 4px 0 var(--shadow);
+  padding: 4px 12px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 0.95rem;
+  font-weight: 900;
+  white-space: nowrap;
+  transform: rotate(6deg);
+  pointer-events: none;
+}
+
+.score-pop.good {
+  background: var(--cyan);
+}
+
+.score-pop.partial {
+  background: var(--yellow);
+}
+
+.score-pop.risky {
+  background: var(--ink);
+  color: #fff;
+}
+
+.game-screen {
+  position: relative;
+}
+
+/* Brief red wash over the game screen when a risky choice is picked */
+.risk-flash {
+  position: absolute;
+  inset: -40px -22px;
+  background: var(--red);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: 5;
+}
+
 .feedback {
   margin: 22px 0 0;
   display: grid;
@@ -1254,6 +1240,11 @@ summary:focus-visible {
   box-shadow: 4px 5px 0 var(--shadow);
   padding: 10px 18px;
   font-weight: 900;
+}
+
+.feedback-points.risky {
+  background: var(--red);
+  color: #fff;
 }
 
 .feedback-reveal {
@@ -1448,50 +1439,6 @@ summary:focus-visible {
   font-size: clamp(0.9rem, 3.4vw, 1.2rem);
 }
 
-.room-panel,
-.side-card {
-  border-radius: 18px;
-  box-shadow: 8px 10px 0 var(--shadow);
-  background: #fff;
-  padding: 20px;
-}
-
-.room-panel h2,
-.side-card h2 {
-  margin: 0 0 8px;
-}
-
-.room-panel p,
-.side-card p {
-  margin: 0 0 10px;
-  font-weight: 700;
-}
-
-.room-actions {
-  display: grid;
-  gap: 12px;
-}
-
-.room-actions button {
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border: 2px solid var(--ink);
-  border-radius: 10px;
-  background: var(--yellow);
-  font-weight: 900;
-}
-
-.room-actions span {
-  font-weight: 900;
-}
-
-.room-message {
-  color: var(--navy);
-}
-
 /* ---------- Motion ---------- */
 
 @keyframes screen-in {
@@ -1543,10 +1490,6 @@ summary:focus-visible {
 
 .progress-line span {
   transition: width 500ms cubic-bezier(0.16, 0.84, 0.44, 1);
-}
-
-.meter i {
-  transition: width 700ms cubic-bezier(0.16, 0.84, 0.44, 1);
 }
 
 .choice {
@@ -1637,7 +1580,6 @@ summary:focus-visible {
     animation: none !important;
   }
 
-  .meter i,
   .progress-line span,
   .sticker-button,
   .choice,
@@ -1651,14 +1593,6 @@ summary:focus-visible {
 @media (max-width: 390px) {
   .phone-stage {
     padding-inline: 16px;
-  }
-
-  .metrics-grid {
-    gap: 12px;
-  }
-
-  .metric-card {
-    padding: 12px;
   }
 
   .score-card {
@@ -1809,8 +1743,8 @@ summary:focus-visible {
 
 @media (min-width: 900px) {
   .app-shell {
-    grid-template-columns: minmax(420px, 520px) 340px;
-    gap: 48px;
+    grid-template-columns: minmax(420px, 520px);
+    justify-content: center;
     align-items: start;
     padding: 36px;
   }
@@ -1825,12 +1759,5 @@ summary:focus-visible {
        (e.g. the last button on a scrollable screen) isn't clipped by the
        rounded corner even when scrolled all the way down. */
     padding-bottom: max(46px, env(safe-area-inset-bottom));
-  }
-
-  .desktop-side {
-    display: grid;
-    gap: 24px;
-    position: sticky;
-    top: 36px;
   }
 }
