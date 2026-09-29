@@ -9,6 +9,7 @@
   --ink: #080808;
   --shadow: #020202;
   --radius: 18px;
+  --font-museo: "Museo Sans", Museo, "Trebuchet MS", Arial, sans-serif;
   font-family: Arial, Helvetica, ui-sans-serif, system-ui, sans-serif;
   color: var(--ink);
   background: #1641b4;
@@ -625,7 +626,8 @@ summary:focus-visible {
 
 .verify-card p {
   margin: 0;
-  font-weight: 800;
+  font-family: var(--font-museo);
+  font-weight: 500;
   font-size: clamp(1.15rem, 4.5vw, 1.5rem);
 }
 
@@ -663,6 +665,7 @@ summary:focus-visible {
   padding: 0 8px 8px;
   background: transparent;
   box-shadow: none;
+  font-family: var(--font-museo);
   font-weight: 700;
   font-size: clamp(1.05rem, 4.5vw, 1.3rem);
   text-align: center;
@@ -670,7 +673,9 @@ summary:focus-visible {
 
 .verify-card input::placeholder {
   color: #cfcfcf;
-  font-weight: 900;
+  font-family: var(--font-museo);
+  font-weight: 500;
+  opacity: 1;
 }
 
 .card-sparkle,
@@ -725,6 +730,7 @@ summary:focus-visible {
   border-radius: 999px;
   box-shadow: 5px 7px 0 var(--shadow);
   padding: 12px 18px;
+  font-family: var(--font-museo);
   font-size: clamp(0.85rem, 3.6vw, 1rem);
   font-weight: 900;
   text-align: center;

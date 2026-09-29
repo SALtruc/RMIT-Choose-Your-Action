@@ -492,7 +492,7 @@ export default function App() {
             </form>
             <div className="verify-footer">
               <img className="verify-character" src="/assets/start-character.png" alt="" />
-              <p className="verify-note">Please enter your SID to verify!</p>
+              <p className="verify-note">Please enter your SID to verify</p>
             </div>
           </section>
         ) : null}
